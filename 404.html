@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>页面走丢了</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #ffb6c1 0%, #ff9eb5 40%, #ff85a1 100%);
+            font-family: 'Segoe UI', 'Quicksand', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        /* 动态漂浮爱心背景 */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            bottom: -40px;
+            background: rgba(255, 240, 245, 0.7);
+            transform: rotate(45deg);
+            animation: floatUp linear infinite;
+            opacity: 0.6;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .heart::before {
+            top: -50%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .heart::after {
+            top: 0;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(45deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-120vh) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        /* 主卡片 */
+        .error-card {
+            position: relative;
+            z-index: 20;
+            max-width: 550px;
+            width: 100%;
+            background: rgba(255, 250, 240, 0.95);
+            backdrop-filter: blur(3px);
+            border-radius: 68px 68px 80px 80px;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255,255,255,0.6);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            animation: cardGlow 2s infinite alternate;
+            text-align: center;
+        }
+
+        @keyframes cardGlow {
+            0% { box-shadow: 0 30px 50px rgba(0,0,0,0.2), 0 0 0 0 rgba(255,105,130,0.3); }
+            100% { box-shadow: 0 35px 55px rgba(0,0,0,0.25), 0 0 0 12px rgba(255,105,130,0.2); }
+        }
+
+        /* 顶部装饰 */
+        .hero {
+            background: linear-gradient(135deg, #ff758c, #ff4d6d);
+            padding: 40px 20px 30px;
+            text-align: center;
+            color: white;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+
+        .hero h1 {
+            font-size: 5rem;
+            letter-spacing: 8px;
+            font-weight: 800;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            display: inline-block;
+            animation: gentleShake 2s ease infinite;
+        }
+
+        @keyframes gentleShake {
+            0%,100%{ transform: translateY(0);}
+            50%{ transform: translateY(-5px);}
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            font-style: italic;
+        }
+
+        /* 内容区 */
+        .message-box {
+            padding: 35px 30px 25px;
+            background: #fffef7;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #c44569;
+            margin-bottom: 15px;
+        }
+
+        .error-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #5c5f6b;
+            margin: 15px 0;
+            padding: 0 10px;
+        }
+
+        .error-description strong {
+            color: #ff4d6d;
+        }
+
+        /* 可爱小装饰 */
+        .cute-animation {
+            margin: 20px 0;
+            font-size: 2rem;
+            letter-spacing: 10px;
+        }
+
+        .cute-animation span {
+            display: inline-block;
+            animation: bounce 1s ease-in-out infinite;
+            animation-delay: calc(var(--i) * 0.1s);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* 按钮区域 */
+        .action-area {
+            padding: 10px 30px 40px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            background: #fffef7;
+        }
+
+        .btn {
+            border: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 14px 32px;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+            font-family: inherit;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b81, #ff4d6d);
+            color: white;
+            box-shadow: 0 6px 0 #b23c50;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ff4d6d, #ff3355);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #b23c50;
+        }
+
+        .btn-primary:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #b23c50;
+        }
+
+        .btn-secondary {
+            background: #e0e4e8;
+            color: #5c5f6b;
+            box-shadow: 0 6px 0 #a6aab2;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d4dc;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #a6aab2;
+        }
+
+        .btn-secondary:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #a6aab2;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            background: #fffef7;
+            padding: 12px 0 20px;
+            color: #e2a1b0;
+        }
+
+        /* 响应式 */
+        @media (max-width: 550px) {
+            .hero h1 {
+                font-size: 3rem;
+                letter-spacing: 4px;
+            }
+            .hero p {
+                font-size: 1rem;
+            }
+            .error-title {
+                font-size: 1.2rem;
+            }
+            .error-description {
+                font-size: 0.9rem;
+            }
+            .btn {
+                padding: 10px 24px;
+                font-size: 1rem;
+            }
+            .cute-animation {
+                font-size: 1.5rem;
+                letter-spacing: 6px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            .action-area {
+                gap: 15px;
+            }
+            .btn {
+                padding: 8px 18px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 提示气泡 */
+        .hover-tip {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 240, 245, 0.88);
+            backdrop-filter: blur(8px);
+            color: #c44569;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 11px;
+            z-index: 1000;
+            pointer-events: none;
+            font-family: inherit;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .hover-tip {
+                bottom: 12px;
+                right: 12px;
+                font-size: 9px;
+                padding: 4px 10px;
+            }
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* 点击漂浮文字特效 */
+        .floating-love {
+            position: fixed;
+            pointer-events: none;
+            z-index: 99999;
+            font-weight: bold;
+            white-space: nowrap;
+            animation: floatAway 1.5s ease-out forwards;
+        }
+
+        @keyframes floatAway {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.4) rotate(0deg);
+            }
+            30% {
+                opacity: 0.95;
+                transform: translateY(-30px) scale(1.15) rotate(6deg);
+            }
+            70% {
+                opacity: 0.6;
+                transform: translateY(-85px) scale(0.95) rotate(-3deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-150px) scale(0.7) rotate(5deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="floating-hearts" id="heartCanvas"></div>
+
+<div class="error-card">
+    <div class="hero">
+        <h1>404</h1>
+        <p>页面走丢了~</p>
+    </div>
+    <div class="message-box">
+        <div class="error-icon">
+            🥺💕
+        </div>
+        <div class="error-title">
+            哎呀！页面找不到了
+        </div>
+        <div class="error-description">
+            可能是链接出了点小差错，<br>
+            或者页面偷偷跑去吃糖了 🍬<br>
+            <strong>别担心，我带你回家~</strong>
+        </div>
+        
+        <!-- 可爱动画 -->
+        <div class="cute-animation">
+            <span style="--i:0">💕</span>
+            <span style="--i:1">✨</span>
+            <span style="--i:2">💗</span>
+            <span style="--i:3">🌟</span>
+            <span style="--i:4">💖</span>
+            <span style="--i:5">🌸</span>
+            <span style="--i:6">💝</span>
+        </div>
+        
+        <div class="action-area">
+            <a href="/" class="btn btn-primary">🏠 返回首页</a>
+            <button class="btn btn-secondary" id="goBackBtn">↩️ 返回上一页</button>
+        </div>
+    </div>
+    <footer>
+        💕 不管在哪里，我都会找到你 💕
+    </footer>
+</div>
+
+<div class="hover-tip">✨ 点击屏幕有惊喜 | 我们一起回家 ✨</div>
+
+<script>
+    (function() {
+        // 1. 动态漂浮爱心生成器
+        const heartsContainer = document.getElementById('heartCanvas');
+        
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            const size = Math.random() * 18 + 10;
+            heart.style.width = size + 'px';
+            heart.style.height = size + 'px';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDuration = Math.random() * 5 + 4 + 's';
+            heart.style.animationDelay = Math.random() * 4 + 's';
+            const opacityVal = Math.random() * 0.5 + 0.3;
+            heart.style.background = `rgba(255, 210, 220, ${opacityVal})`;
+            heartsContainer.appendChild(heart);
+            heart.addEventListener('animationend', () => {
+                heart.remove();
+            });
+        }
+        
+        // 批量生成爱心
+        for(let i = 0; i < 20; i++) {
+            setTimeout(() => createFloatingHeart(), i * 200);
+        }
+        setInterval(() => {
+            if (heartsContainer.children.length < 55) {
+                createFloatingHeart();
+            }
+        }, 1500);
+        
+        // 2. 返回上一页功能
+        const goBackBtn = document.getElementById('goBackBtn');
+        goBackBtn.addEventListener('click', () => {
+            if (document.referrer && document.referrer !== '') {
+                window.history.back();
+            } else {
+                window.location.href = '/';
+            }
+        });
+        
+        // 3. 点击漂浮文字特效
+        const sweetWords = [
+            "乖乖", "❤️宝贝❤️", "么😗么", "❤️❤️❤️", 
+            "别担心~", "我在这里", "一起回家", "💕 404 也爱你 💕", 
+            "迷路的小可爱", "抱抱🫂", "找到你啦✨", "永远不分开",
+            "💖 带你回家 💖", "别怕，有我在", "么么哒~", "❤️"
+        ];
+        let wordIndex = 0;
+        
+        function createSparkle(x, y) {
+            const star = document.createElement('div');
+            star.classList.add('floating-love');
+            const word = sweetWords[wordIndex % sweetWords.length];
+            wordIndex++;
+            star.textContent = word;
+            const colors = ['#ff6699', '#ff88aa', '#ff66b5', '#ff77aa', '#ff5e8e', '#ff99bb', '#ff6b81'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const fontSize = Math.random() * 18 + 18;
+            star.style.left = (x - 12) + 'px';
+            star.style.top = (y - 12) + 'px';
+            star.style.position = 'fixed';
+            star.style.fontSize = fontSize + 'px';
+            star.style.color = randomColor;
+            star.style.textShadow = '0 0 8px #fff, 0 0 5px #ffb3d9';
+            star.style.fontFamily = "'Segoe UI', 'PingFang SC', cursive";
+            star.style.pointerEvents = 'none';
+            star.style.zIndex = '9999';
+            document.body.appendChild(star);
+            setTimeout(() => star.remove(), 1400);
+        }
+        
+        // 点击页面任意位置出现甜蜜文字
+        document.body.addEventListener('click', (e) => {
+            // 避免点击按钮时产生过多特效
+            if (e.target.closest('.btn') || e.target.closest('.music-control') || e.target.closest('.music-card')) {
+                return;
+            }
+            createSparkle(e.clientX, e.clientY);
+        });
+        
+        // 卡片内点击也产生特效
+        document.querySelector('.error-card').addEventListener('click', (e) => {
+            if (e.target.closest('.btn')) return;
+            createSparkle(e.clientX, e.clientY);
+        });
+        
+        // 添加按钮波纹效果
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                ripple.style.cssText = `
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.6);
+                    width: 100px;
+                    height: 100px;
+                    margin-top: -50px;
+                    margin-left: -50px;
+                    transform: scale(0);
+                    animation: rippleAnim 0.5s ease-out;
+                    pointer-events: none;
+                `;
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                this.style.position = 'relative';
+                this.style.overflow = 'hidden';
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 500);
+            });
+        });
+        
+        // 添加波纹动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes rippleAnim {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 控制台输出浪漫提示
+        console.log('%c💖 404页面加载完成，我们回家吧 💖', 'color: #ff6b81; font-size: 16px; font-weight: bold;');
+        console.log('%c✨ 点击屏幕任意位置会有甜蜜惊喜 ✨', 'color: #ff99bb; font-size: 12px;');
+        
+        // 欢迎彩蛋
+        setTimeout(() => {
+            const welcomeHeart = document.createElement('div');
+            welcomeHeart.innerText = '💖 别迷路啦，我带你回家 💖';
+            welcomeHeart.style.position = 'fixed';
+            welcomeHeart.style.bottom = '20px';
+            welcomeHeart.style.left = '20px';
+            welcomeHeart.style.background = 'rgba(255,225,230,0.95)';
+            welcomeHeart.style.padding = '6px 14px';
+            welcomeHeart.style.borderRadius = '40px';
+            welcomeHeart.style.fontSize = '12px';
+            welcomeHeart.style.fontWeight = 'bold';
+            welcomeHeart.style.color = '#c44569';
+            welcomeHeart.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            welcomeHeart.style.zIndex = '100';
+            welcomeHeart.style.pointerEvents = 'none';
+            welcomeHeart.style.fontFamily = 'inherit';
+            document.body.appendChild(welcomeHeart);
+            setTimeout(() => welcomeHeart.remove(), 4000);
+        }, 800);
+    })();
+</script>
+
+<!-- 额外样式优化 -->
+<style>
+    .error-card {
+        transition: transform 0.3s ease;
+    }
+    
+    .error-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .cute-animation span {
+        display: inline-block;
+    }
+    
+    .btn {
+        cursor: pointer;
+    }
+    
+    /* 确保所有链接样式统一 */
+    a.btn {
+        display: inline-block;
+        text-align: center;
+    }
+    
+    /* 动画延迟 */
+    .cute-animation span:nth-child(1) { animation-delay: 0s; }
+    .cute-animation span:nth-child(2) { animation-delay: 0.1s; }
+    .cute-animation span:nth-child(3) { animation-delay: 0.2s; }
+    .cute-animation span:nth-child(4) { animation-delay: 0.3s; }
+    .cute-animation span:nth-child(5) { animation-delay: 0.4s; }
+    .cute-animation span:nth-child(6) { animation-delay: 0.5s; }
+    .cute-animation span:nth-child(7) { animation-delay: 0.6s; }
+</style>
+</body>
+</html>
