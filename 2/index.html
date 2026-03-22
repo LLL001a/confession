@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>XX宝贝 · 我们的纪念日</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #ffb6c1 0%, #ff9eb5 40%, #ff85a1 100%);
+            font-family: 'Segoe UI', 'Quicksand', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 动态漂浮爱心背景 */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            bottom: -40px;
+            background: rgba(255, 240, 245, 0.7);
+            transform: rotate(45deg);
+            animation: floatUp linear infinite;
+            opacity: 0.6;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .heart::before {
+            top: -50%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .heart::after {
+            top: 0;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(45deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-120vh) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        /* 主容器 */
+        .anniversary-container {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 30px 20px 50px;
+        }
+
+        /* 浪漫标题卡片 */
+        .title-section {
+            text-align: center;
+            margin-bottom: 25px;
+            animation: titleFloat 2s ease-in-out infinite;
+        }
+
+        .title-section h1 {
+            font-size: clamp(1.6rem, 6vw, 2.6rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #ffeef4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            letter-spacing: 3px;
+        }
+
+        .title-section p {
+            font-size: clamp(0.8rem, 3vw, 1rem);
+            color: rgba(255, 255, 255, 0.92);
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* 音乐播放器 */
+        .music-card {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 100;
+            background: rgba(255, 245, 240, 0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 50px;
+            padding: 8px 16px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .music-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+        }
+
+        .music-icon {
+            font-size: 28px;
+            animation: musicWave 1.5s ease-in-out infinite;
+        }
+
+        @keyframes musicWave {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .music-info {
+            font-size: 14px;
+            font-weight: 500;
+            color: #c44569;
+        }
+
+        .music-info small {
+            font-size: 11px;
+            color: #ff8899;
+            display: block;
+        }
+
+        .music-control {
+            background: #ff6b81;
+            border: none;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .music-control:hover {
+            background: #ff4d6d;
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 768px) {
+            .music-card {
+                top: 8px;
+                right: 8px;
+                padding: 6px 12px;
+            }
+            .music-icon { font-size: 22px; }
+            .music-info { font-size: 11px; }
+            .music-control { padding: 2px 8px; font-size: 10px; }
+        }
+
+        audio {
+            display: none;
+        }
+
+        /* 主卡片 - 天数显示区域 */
+        .days-card {
+            background: rgba(255, 250, 240, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 60px;
+            padding: 45px 35px;
+            margin: 20px auto;
+            max-width: 750px;
+            width: 90%;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            text-align: center;
+        }
+
+        /* 主文字样式 - 天数单独一行 */
+        .main-text-prefix {
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            font-weight: 600;
+            color: #c44569;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .days-number-large {
+            font-size: clamp(3.5rem, 12vw, 6rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff4d6d, #ff6b81);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 10px 0;
+            letter-spacing: 8px;
+            font-family: 'Courier New', monospace;
+            display: inline-block;
+            animation: numberPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes numberPulse {
+            0%, 100% { opacity: 1; text-shadow: 0 0 5px rgba(255, 77, 109, 0.3); }
+            50% { opacity: 0.95; text-shadow: 0 0 15px rgba(255, 77, 109, 0.5); }
+        }
+
+        .days-suffix {
+            font-size: clamp(1rem, 3.5vw, 1.3rem);
+            font-weight: 500;
+            color: #ff99aa;
+            margin-top: 5px;
+        }
+
+        /* 时间显示区域 */
+        .time-display {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-family: 'Courier New', monospace;
+        }
+
+        .time-unit {
+            background: rgba(255, 107, 129, 0.12);
+            border-radius: 50px;
+            padding: 8px 18px;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 6px;
+            backdrop-filter: blur(4px);
+        }
+
+        .time-number {
+            font-size: clamp(1.2rem, 4vw, 1.6rem);
+            font-weight: 800;
+            color: #ff4d6d;
+            min-width: 55px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+
+        .time-label {
+            font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+            color: #b34e71;
+            font-weight: 500;
+        }
+
+        /* 浪漫装饰文字 */
+        .love-quote {
+            margin-top: 30px;
+            font-size: 0.95rem;
+            color: #ff99aa;
+            letter-spacing: 2px;
+            padding-top: 20px;
+            border-top: 2px dashed #ffccd5;
+        }
+
+        .love-quote i {
+            font-style: italic;
+        }
+
+        /* 浪漫按钮 */
+        .button-area {
+            margin: 25px auto 15px;
+            text-align: center;
+        }
+
+        .btn-romantic {
+            background: linear-gradient(135deg, #ff6b81, #ff4d6d);
+            border: none;
+            padding: 14px 48px;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 0 #b23c50;
+            font-family: inherit;
+            letter-spacing: 2px;
+        }
+
+        .btn-romantic:hover {
+            background: linear-gradient(135deg, #ff4d6d, #ff3355);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 0 #b23c50;
+        }
+
+        .btn-romantic:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #b23c50;
+        }
+
+        /* 底部装饰 */
+        .footer-love {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 1px;
+        }
+
+        /* 点击漂浮文字特效 */
+        .floating-love {
+            position: fixed;
+            pointer-events: none;
+            z-index: 99999;
+            font-weight: bold;
+            white-space: nowrap;
+            animation: floatAway 1.5s ease-out forwards;
+        }
+
+        @keyframes floatAway {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.4) rotate(0deg);
+            }
+            30% {
+                opacity: 0.95;
+                transform: translateY(-30px) scale(1.15) rotate(6deg);
+            }
+            70% {
+                opacity: 0.6;
+                transform: translateY(-85px) scale(0.95) rotate(-3deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-150px) scale(0.7) rotate(5deg);
+            }
+        }
+
+        /* 悬浮提示 */
+        .hover-tip {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 240, 245, 0.88);
+            backdrop-filter: blur(8px);
+            color: #c44569;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 11px;
+            z-index: 1000;
+            pointer-events: none;
+            font-family: inherit;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .hover-tip {
+                bottom: 12px;
+                left: 12px;
+                font-size: 9px;
+                padding: 4px 10px;
+            }
+            .days-card {
+                padding: 35px 20px;
+            }
+            .time-unit {
+                padding: 5px 12px;
+            }
+            .time-number {
+                min-width: 45px;
+                font-size: 1.1rem;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #ffe0e8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff80b3;
+            border-radius: 10px;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* 飘落花瓣 */
+        .petal {
+            position: fixed;
+            pointer-events: none;
+            z-index: 2;
+            font-size: 20px;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(110vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="floating-hearts" id="heartCanvas"></div>
+
+<div class="music-card" id="musicCard">
+    <div class="music-icon">🎵</div>
+    <div class="music-info">
+        我们的歌
+        <small>专属旋律</small>
+    </div>
+    <button class="music-control" id="musicToggle">播放</button>
+</div>
+
+<audio id="bgMusic" loop preload="auto">
+    <source src="https://music.163.com/song/media/outer/url?id=1899437032.mp3" type="audio/mpeg">
+</audio>
+
+<div class="anniversary-container">
+    <div class="title-section">
+        <h1>💗 亲爱的XX宝贝 💗</h1>
+        <p>与你有关的每一刻，都是最珍贵的礼物</p>
+    </div>
+
+    <div class="days-card">
+        <div class="main-text-prefix">
+            🌸 这是我们在一起的第 🌸
+        </div>
+        <div>
+            <span class="days-number-large" id="daysNumber">0</span>
+        </div>
+        <div class="days-suffix">
+            💕 天 💕
+        </div>
+        
+        <!-- 时分秒显示区域 -->
+        <div class="time-display">
+            <div class="time-unit">
+                <span class="time-number" id="hoursDisplay">00</span>
+                <span class="time-label">小时</span>
+            </div>
+            <div class="time-unit">
+                <span class="time-number" id="minutesDisplay">00</span>
+                <span class="time-label">分</span>
+            </div>
+            <div class="time-unit">
+                <span class="time-number" id="secondsDisplay">00</span>
+                <span class="time-label">秒</span>
+            </div>
+        </div>
+        
+        <div class="love-quote">
+            <i>✨ X周年快乐，我的XX宝贝 ✨</i>
+        </div>
+    </div>
+
+    <div class="button-area">
+        <a href="../movie/movie.html">
+            <button class="btn-romantic">💖 么一下继续 💖</button>
+        </a>
+    </div>
+
+    <div class="footer-love">
+        ✨ 点击屏幕任意位置，会有甜蜜惊喜 ✨
+    </div>
+</div>
+
+<div class="hover-tip">💕 时光记录我们的每一天 💕</div>
+
+<script>
+    // ========== 数字滚动速度配置 ==========
+    const SCROLL_DURATION = 10000;  // 滚动动画时长（毫秒）
+    
+    // ========== 音乐渐强效果 ==========
+    const audio = document.getElementById('bgMusic');
+    const musicToggle = document.getElementById('musicToggle');
+    let isPlaying = false;
+    let fadeAnimationId = null;
+    let targetVolume = 0.38;  // 目标音量38%，舒适且不刺耳
+    
+    // 设置初始音量为0
+    audio.volume = 0;
+    
+    // 渐强函数
+    function fadeInAudio(duration = 2800) {
+        if (fadeAnimationId) {
+            cancelAnimationFrame(fadeAnimationId);
+        }
+        const startVolume = audio.volume;
+        const targetVol = targetVolume;
+        const startTime = performance.now();
+        
+        function step(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // 使用 easeOutCubic 缓动，让声音渐入更自然
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            const newVolume = startVolume + (targetVol - startVolume) * easeProgress;
+            audio.volume = Math.min(targetVol, newVolume);
+            
+            if (progress < 1) {
+                fadeAnimationId = requestAnimationFrame(step);
+            } else {
+                fadeAnimationId = null;
+            }
+        }
+        
+        fadeAnimationId = requestAnimationFrame(step);
+    }
+    
+    // 渐弱函数
+    function fadeOutAudio(duration = 800, callback) {
+        if (fadeAnimationId) {
+            cancelAnimationFrame(fadeAnimationId);
+        }
+        const startVolume = audio.volume;
+        const startTime = performance.now();
+        
+        function step(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const newVolume = startVolume * (1 - progress);
+            audio.volume = Math.max(0, newVolume);
+            
+            if (progress < 1) {
+                fadeAnimationId = requestAnimationFrame(step);
+            } else {
+                audio.pause();
+                audio.volume = 0;
+                fadeAnimationId = null;
+                if (callback) callback();
+            }
+        }
+        
+        fadeAnimationId = requestAnimationFrame(step);
+    }
+    
+    // 播放音乐（带渐强）
+    function playMusicWithFade() {
+        if (audio.paused) {
+            // 先设置音量为0，然后播放，再渐强
+            audio.volume = 0;
+            audio.play().then(() => {
+                fadeInAudio(2500);
+            }).catch(err => {
+                console.log('自动播放被阻止，需要用户交互');
+                // 如果被阻止，标记需要用户交互
+                audio.volume = 0;
+            });
+        } else {
+            fadeInAudio(1500);
+        }
+    }
+    
+    // 暂停音乐（带渐弱）
+    function pauseMusicWithFade() {
+        if (!audio.paused) {
+            fadeOutAudio(800, () => {
+                // 暂停已完成
+            });
+        }
+    }
+    
+    musicToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isPlaying) {
+            pauseMusicWithFade();
+            musicToggle.textContent = '播放';
+            isPlaying = false;
+        } else {
+            playMusicWithFade();
+            musicToggle.textContent = '暂停';
+            isPlaying = true;
+        }
+    });
+    
+    // 页面首次交互时自动播放（带渐强）
+    let hasPlayed = false;
+    document.body.addEventListener('click', () => {
+        if (!hasPlayed && audio.paused) {
+            playMusicWithFade();
+            musicToggle.textContent = '暂停';
+            isPlaying = true;
+            hasPlayed = true;
+        }
+    });
+    
+    // 也监听触摸事件确保移动端能触发
+    document.body.addEventListener('touchstart', () => {
+        if (!hasPlayed && audio.paused) {
+            playMusicWithFade();
+            musicToggle.textContent = '暂停';
+            isPlaying = true;
+            hasPlayed = true;
+        }
+    });
+    
+    // ========== 时间计算 ==========
+    const startDate = new Date('2021-12-18 10:30:00');
+    
+    // 获取元素
+    const daysNumberSpan = document.getElementById('daysNumber');
+    const hoursDisplaySpan = document.getElementById('hoursDisplay');
+    const minutesDisplaySpan = document.getElementById('minutesDisplay');
+    const secondsDisplaySpan = document.getElementById('secondsDisplay');
+    
+    let currentDisplayDays = 0;
+    let targetDays = 0;
+    let animationCompleted = false;
+    
+    // 计算当前实际天数
+    function calculateActualDays() {
+        const now = new Date();
+        const diffTime = Math.abs(now - startDate);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    }
+    
+    // 滚动数字动画 (从0到目标值)
+    function animateNumber(from, to, duration, callback) {
+        if (from === to) {
+            if (callback) callback();
+            return;
+        }
+        const startTime = performance.now();
+        const step = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // 使用 easeOutCubic 缓动函数
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            const currentValue = Math.floor(from + (to - from) * easeProgress);
+            daysNumberSpan.textContent = currentValue;
+            
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                daysNumberSpan.textContent = to;
+                if (callback) callback();
+                animationCompleted = true;
+            }
+        };
+        requestAnimationFrame(step);
+    }
+    
+    // 更新时间显示（小时、分钟、秒）
+    function updateTimeDisplay() {
+        const now = new Date();
+        const diffTime = Math.abs(now - startDate);
+        
+        const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const remainingMs = diffTime - (totalDays * 24 * 60 * 60 * 1000);
+        const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+        const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
+        
+        hoursDisplaySpan.textContent = hours.toString().padStart(2, '0');
+        minutesDisplaySpan.textContent = minutes.toString().padStart(2, '0');
+        secondsDisplaySpan.textContent = seconds.toString().padStart(2, '0');
+        
+        // 如果天数动画已完成，检查是否需要更新天数（跨天后自动更新）
+        if (animationCompleted) {
+            const newTargetDays = calculateActualDays();
+            if (newTargetDays !== targetDays) {
+                targetDays = newTargetDays;
+                daysNumberSpan.textContent = targetDays;
+            }
+        }
+    }
+    
+    // 初始化动画：天数从0滚动到实际值
+    function initDaysAnimation() {
+        targetDays = calculateActualDays();
+        daysNumberSpan.textContent = 0;
+        currentDisplayDays = 0;
+        
+        setTimeout(() => {
+            animateNumber(0, targetDays, SCROLL_DURATION, () => {
+                daysNumberSpan.textContent = targetDays;
+                animationCompleted = true;
+            });
+        }, 100);
+    }
+    
+    // 启动动画和实时时间更新
+    initDaysAnimation();
+    updateTimeDisplay();
+    setInterval(updateTimeDisplay, 1000);
+    
+    // 控制台输出
+    console.log('%c💖 X周年快乐，我的XX宝贝 💖', 'color: #ff6b81; font-size: 18px; font-weight: bold;');
+    console.log(`%c✨ 天数滚动速度: ${SCROLL_DURATION}ms | 音乐渐强至38%音量 ✨`, 'color: #ff99bb; font-size: 12px;');
+    
+    // ========== 动态漂浮爱心生成 ==========
+    const heartsContainer = document.getElementById('heartCanvas');
+    
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        const size = Math.random() * 18 + 10;
+        heart.style.width = size + 'px';
+        heart.style.height = size + 'px';
+        heart.style.left = Math.random() * 100 + '%';
+        heart.style.animationDuration = Math.random() * 5 + 4 + 's';
+        heart.style.animationDelay = Math.random() * 4 + 's';
+        const opacity = Math.random() * 0.5 + 0.3;
+        heart.style.background = `rgba(255, 210, 225, ${opacity})`;
+        heartsContainer.appendChild(heart);
+        
+        heart.addEventListener('animationend', () => {
+            heart.remove();
+        });
+    }
+    
+    for (let i = 0; i < 28; i++) {
+        setTimeout(() => createHeart(), i * 120);
+    }
+    
+    setInterval(() => {
+        if (heartsContainer.children.length < 65) {
+            createHeart();
+        }
+    }, 1100);
+    
+    // ========== 点击漂浮文字特效 ==========
+    function getCurrentDaysText() {
+        const days = parseInt(daysNumberSpan.textContent) || 0;
+        return `❤️ 第 ${days} 天 ❤️`;
+    }
+    
+    const sweetWords = [
+        "老😬婆", "乖乖", "❤️宝贝❤️", "么😗么", "❤️❤️❤️", 
+        "❤️❤️", "乖乖", "❤️", "嘿嘿😬", "别点了😪", "略略略😝", 
+        "摸你屁屁🤗", "好喜欢你✨", "甜度满分💯", "永远在一起💞", 
+        "啵啵💋", "想你啦~", "心动预警💗", "我的小可爱", "抱抱🫂",
+        "💕 一周年快乐 💕", "爱你每一天", "你是我的全世界", "永远不分开"
+    ];
+    let wordIndex = 0;
+    
+    document.body.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-romantic') || e.target.closest('.music-control') || e.target.closest('.music-card')) {
+            return;
+        }
+        
+        let word;
+        if (Math.random() < 0.15 && animationCompleted) {
+            word = getCurrentDaysText();
+        } else {
+            word = sweetWords[wordIndex % sweetWords.length];
+            wordIndex++;
+        }
+        
+        const span = document.createElement('span');
+        span.className = 'floating-love';
+        span.textContent = word;
+        
+        const colors = ['#ff6699', '#ff88aa', '#ff66b5', '#ff77aa', '#ff5e8e', '#ff99bb', '#ff6b81', '#ff8da1'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        const fontSize = Math.random() * 18 + 18;
+        
+        span.style.left = e.clientX + 'px';
+        span.style.top = (e.clientY - 15) + 'px';
+        span.style.fontSize = fontSize + 'px';
+        span.style.color = randomColor;
+        span.style.textShadow = '0 0 8px #fff, 0 0 5px #ffb3d9';
+        span.style.fontFamily = "'Segoe UI', 'PingFang SC', cursive";
+        
+        document.body.appendChild(span);
+        
+        setTimeout(() => span.remove(), 1400);
+    });
+    
+    // ========== 飘落花瓣效果 ==========
+    function isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+    
+    const petals = ['🌸', '💕', '💗', '✨', '⭐', '💖', '🌹'];
+    
+    function createPetal() {
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+        petal.textContent = petals[Math.floor(Math.random() * petals.length)];
+        petal.style.left = Math.random() * 100 + '%';
+        petal.style.fontSize = Math.random() * 18 + 12 + 'px';
+        petal.style.animationDuration = Math.random() * 5 + 4 + 's';
+        petal.style.animationDelay = Math.random() * 8 + 's';
+        petal.style.opacity = Math.random() * 0.6 + 0.3;
+        document.body.appendChild(petal);
+        
+        setTimeout(() => petal.remove(), 9000);
+    }
+    
+    if (!isMobile()) {
+        for (let i = 0; i < 15; i++) {
+            setTimeout(() => createPetal(), i * 400);
+        }
+        setInterval(() => {
+            if (document.body.children.length < 150) {
+                createPetal();
+            }
+        }, 3000);
+    }
+    
+    // ========== 按钮波纹效果 ==========
+    const buttons = document.querySelectorAll('.btn-romantic');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.6);
+                width: 100px;
+                height: 100px;
+                margin-top: -50px;
+                margin-left: -50px;
+                transform: scale(0);
+                animation: rippleAnim 0.5s ease-out;
+                pointer-events: none;
+            `;
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 500);
+        });
+    });
+    
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes rippleAnim {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    window.addEventListener('resize', () => {});
+    
+    // 确保音乐播放器按钮文本初始状态正确
+    setTimeout(() => {
+        if (audio.paused) {
+            musicToggle.textContent = '播放';
+            isPlaying = false;
+        } else {
+            musicToggle.textContent = '暂停';
+            isPlaying = true;
+        }
+    }, 100);
+</script>
+
+<!-- 额外样式优化 -->
+<style>
+    .days-number-large {
+        transition: all 0.1s ease;
+        display: inline-block;
+    }
+    
+    .time-number {
+        font-feature-settings: "tnum";
+        font-variant-numeric: tabular-nums;
+    }
+    
+    .music-card {
+        cursor: pointer;
+    }
+    
+    .days-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .days-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 50px rgba(0, 0, 0, 0.25);
+    }
+    
+    a {
+        display: inline-block;
+    }
+    
+    @media (max-width: 550px) {
+        .time-display {
+            gap: 8px;
+        }
+        .time-unit {
+            padding: 4px 10px;
+        }
+        .days-number-large {
+            letter-spacing: 4px;
+        }
+    }
+</style>
+</body>
+</html>
