@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>浪漫时刻 · 我们的专属影片</title>
+    <style>
+        /* ========== 与表白页完全统一的风格 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            height: 100vh;
+            width: 100%;
+            background: linear-gradient(145deg, #ffb6c1 0%, #ff9eb5 40%, #ff85a1 100%);
+            font-family: 'Segoe UI', 'Quicksand', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        /* 动态漂浮爱心背景 */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            bottom: -40px;
+            background: rgba(255, 240, 245, 0.7);
+            transform: rotate(45deg);
+            animation: floatUp linear infinite;
+            opacity: 0.6;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .heart::before {
+            top: -50%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .heart::after {
+            top: 0;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(45deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-120vh) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        /* 主容器 - 完美铺满无滚动 */
+        .video-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 20px;
+            animation: fadeInUp 0.6s ease-out;
+            overflow: hidden;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 浪漫标题卡片 - 紧凑版 */
+        .title-card {
+            text-align: center;
+            margin-bottom: 12px;
+            animation: titleFloat 2s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+
+        .title-card h1 {
+            font-size: clamp(1.3rem, 5vw, 2rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #ffeef4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            letter-spacing: 2px;
+        }
+
+        .title-card p {
+            font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+            color: rgba(255, 255, 255, 0.92);
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        /* 视频播放器区域 - 自适应大小 */
+        .video-wrapper {
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 10px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            flex-shrink: 1;
+            width: 100%;
+            max-width: 900px;
+            margin: 8px 0;
+        }
+
+        .video-wrapper:hover {
+            transform: scale(1.01);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
+        }
+
+        video {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 55vh;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.3s;
+            object-fit: contain;
+            background: linear-gradient(145deg, #2a1a2a, #1a0a1a);
+        }
+
+        video:active {
+            transform: scale(0.99);
+        }
+
+        /* 按钮组 - 紧凑排列 */
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 12px 0 8px;
+            flex-shrink: 0;
+        }
+
+        /* 浪漫按钮样式 */
+        .btn-romantic {
+            background: linear-gradient(135deg, #ff6b81, #ff4d6d);
+            border: none;
+            padding: 10px 32px;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 0 #b23c50;
+            font-family: inherit;
+            letter-spacing: 1px;
+        }
+
+        .btn-romantic:hover {
+            background: linear-gradient(135deg, #ff4d6d, #ff3355);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 #b23c50;
+        }
+
+        .btn-romantic:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #b23c50;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #9b6bff, #7b4dff);
+            box-shadow: 0 5px 0 #5a3ab2;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #8b5bff, #6b3dff);
+        }
+
+        /* 倒计时卡片 - 紧凑版 */
+        .countdown-card {
+            background: rgba(255, 250, 240, 0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 50px;
+            padding: 8px 24px;
+            margin: 8px auto 5px;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            flex-shrink: 0;
+        }
+
+        .countdown-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ff3366;
+            background: white;
+            padding: 0 14px;
+            border-radius: 50px;
+            min-width: 85px;
+            display: inline-block;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .countdown-text {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #c44569;
+            letter-spacing: 1px;
+        }
+
+        /* 底部装饰 */
+        .footer-love {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+
+        /* 悬浮提示 */
+        .hover-tip {
+            position: fixed;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(255, 240, 245, 0.88);
+            backdrop-filter: blur(8px);
+            color: #c44569;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 9px;
+            z-index: 1000;
+            pointer-events: none;
+            font-family: inherit;
+            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 点击漂浮文字特效 */
+        .floating-love {
+            position: fixed;
+            pointer-events: none;
+            z-index: 99999;
+            font-weight: bold;
+            white-space: nowrap;
+            animation: floatAway 1.5s ease-out forwards;
+        }
+
+        @keyframes floatAway {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.4) rotate(0deg);
+            }
+            30% {
+                opacity: 0.95;
+                transform: translateY(-30px) scale(1.15) rotate(6deg);
+            }
+            70% {
+                opacity: 0.6;
+                transform: translateY(-85px) scale(0.95) rotate(-3deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-140px) scale(0.7) rotate(5deg);
+            }
+        }
+
+        /* 滚动条隐藏 - 确保无滚动 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* 视频加载动画 */
+        .video-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ff6b81;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* 响应式适配 - 确保各屏幕铺满 */
+        @media (max-width: 768px) {
+            .video-container {
+                padding: 10px 15px;
+            }
+            .video-wrapper {
+                padding: 6px;
+                border-radius: 20px;
+            }
+            video {
+                max-height: 50vh;
+            }
+            .btn-romantic {
+                padding: 8px 24px;
+                font-size: 0.85rem;
+            }
+            .countdown-number {
+                font-size: 1.5rem;
+                min-width: 70px;
+                padding: 0 10px;
+            }
+            .countdown-text {
+                font-size: 0.75rem;
+            }
+            .countdown-card {
+                padding: 6px 18px;
+                gap: 8px;
+            }
+            .button-group {
+                gap: 15px;
+                margin: 8px 0 5px;
+            }
+            .title-card {
+                margin-bottom: 6px;
+            }
+            .footer-love {
+                margin-top: 5px;
+                font-size: 0.55rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .btn-romantic {
+                padding: 6px 18px;
+                font-size: 0.75rem;
+            }
+            .countdown-number {
+                font-size: 1.2rem;
+                min-width: 55px;
+                padding: 0 6px;
+            }
+            .countdown-text {
+                font-size: 0.65rem;
+            }
+            .button-group {
+                gap: 12px;
+            }
+            video {
+                max-height: 45vh;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            video {
+                max-height: 60vh;
+            }
+            .btn-romantic {
+                padding: 12px 38px;
+                font-size: 1rem;
+            }
+            .countdown-number {
+                font-size: 2.2rem;
+                min-width: 95px;
+            }
+        }
+
+        /* 波纹动画 */
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 动态漂浮爱心背景 -->
+<div class="floating-hearts" id="heartCanvas"></div>
+
+<div class="video-container">
+    <!-- 浪漫标题 -->
+    <div class="title-card">
+        <h1>💋 专属放映厅 💋</h1>
+        <p>每一帧都是心动的痕迹</p>
+    </div>
+
+    <!-- 视频播放区域 -->
+    <div class="video-wrapper">
+        <video id="loveVideo" controls="controls">
+            <source src="movie.mp4" type="video/mp4">
+            您的浏览器不支持视频播放，换个浏览器试试吧~
+        </video>
+        <div class="video-loading" id="videoLoading"></div>
+    </div>
+
+    <!-- 控制按钮组 -->
+    <div class="button-group">
+        <button class="btn-romantic" id="playPauseBtn">⏸️ 播放/暂停</button>
+        <a href="../4/index.html">
+            <button class="btn-romantic btn-secondary">💖 么么下一页 💖</button>
+        </a>
+    </div>
+    
+    <!-- 倒计时卡片 -->
+    <div class="countdown-card">
+        <span class="countdown-number" id="timer">210</span>
+        <span class="countdown-text">秒后自动跳转至下一页 🌸</span>
+    </div>
+
+    <div class="footer-love">
+        ✨ 点击屏幕任意位置，会有甜蜜惊喜 ✨
+    </div>
+</div>
+
+<!-- 悬浮提示 -->
+<div class="hover-tip">🎬 点击视频也可播放/暂停</div>
+
+<script>
+    // ========== 视频控制逻辑 ==========
+    const video = document.getElementById('loveVideo');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const loadingDiv = document.getElementById('videoLoading');
+    
+    // 视频配置
+    video.autoplay = true;
+    video.loop = true;
+    video.muted = false;
+    
+    // 显示加载状态
+    video.addEventListener('waiting', () => {
+        loadingDiv.style.opacity = '1';
+    });
+    
+    video.addEventListener('canplay', () => {
+        loadingDiv.style.opacity = '0';
+    });
+    
+    video.addEventListener('playing', () => {
+        loadingDiv.style.opacity = '0';
+        playPauseBtn.innerHTML = '⏸️ 播放/暂停';
+    });
+    
+    video.addEventListener('pause', () => {
+        playPauseBtn.innerHTML = '▶️ 播放/暂停';
+    });
+    
+    video.addEventListener('play', () => {
+        playPauseBtn.innerHTML = '⏸️ 播放/暂停';
+    });
+    
+    // 播放/暂停按钮功能
+    function togglePlay() {
+        if (video.paused) {
+            video.play().catch(err => {
+                console.log('播放失败:', err);
+            });
+        } else {
+            video.pause();
+        }
+    }
+    
+    playPauseBtn.addEventListener('click', togglePlay);
+    
+    // 点击视频也能切换播放/暂停
+    video.addEventListener('click', togglePlay);
+    
+    // 尝试自动播放（浏览器可能阻止，但用户点击后会自动恢复）
+    video.play().catch(err => {
+        console.log('自动播放被阻止，等待用户交互');
+        playPauseBtn.innerHTML = '▶️ 播放/暂停';
+    });
+    
+    // ========== 倒计时逻辑 ==========
+    const timerSpan = document.getElementById('timer');
+    let remainingSeconds = 210;
+    let countdownInterval;
+    
+    function updateCountdown() {
+        if (remainingSeconds > 0) {
+            remainingSeconds--;
+            timerSpan.textContent = remainingSeconds;
+        } else {
+            clearInterval(countdownInterval);
+            window.location.href = "../4/index.html";
+        }
+    }
+    
+    countdownInterval = setInterval(updateCountdown, 1000);
+    
+    // ========== 动态漂浮爱心生成 ==========
+    const heartsContainer = document.getElementById('heartCanvas');
+    
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        const size = Math.random() * 18 + 10;
+        heart.style.width = size + 'px';
+        heart.style.height = size + 'px';
+        heart.style.left = Math.random() * 100 + '%';
+        heart.style.animationDuration = Math.random() * 5 + 4 + 's';
+        heart.style.animationDelay = Math.random() * 4 + 's';
+        const opacity = Math.random() * 0.5 + 0.3;
+        heart.style.background = `rgba(255, 210, 225, ${opacity})`;
+        heartsContainer.appendChild(heart);
+        
+        heart.addEventListener('animationend', () => {
+            heart.remove();
+        });
+    }
+    
+    // 初始生成爱心
+    for (let i = 0; i < 25; i++) {
+        setTimeout(() => createHeart(), i * 150);
+    }
+    
+    // 定时生成爱心
+    setInterval(() => {
+        if (heartsContainer.children.length < 60) {
+            createHeart();
+        }
+    }, 1200);
+    
+    // ========== 点击漂浮文字特效 ==========
+    const sweetWords = [
+        "秀秀", "老😬婆", "乖乖", "❤️宝贝❤️", "么😗么", "❤️❤️❤️", 
+        "❤️❤️", "乖乖", "❤️", "嘿嘿😬", "别点了😪", "略略略😝", 
+        "摸你屁屁🤗", "好喜欢你✨", "甜度满分💯", "永远在一起💞", 
+        "啵啵💋", "想你啦~", "心动预警💗", "我的小可爱", "抱抱🫂",
+        "💕 我爱你 💕", "你是我的光", "每天都要甜甜的", "只对你心动",
+        "💋 亲亲", "好甜呀~", "永远在一起"
+    ];
+    let wordIndex = 0;
+    
+    document.body.addEventListener('click', (e) => {
+        // 避免点击按钮时产生过多特效
+        if (e.target.closest('.btn-romantic') || e.target.closest('a') || e.target === video || e.target.closest('.video-wrapper')) {
+            return;
+        }
+        
+        const word = sweetWords[wordIndex % sweetWords.length];
+        wordIndex++;
+        
+        const span = document.createElement('span');
+        span.className = 'floating-love';
+        span.textContent = word;
+        
+        const colors = ['#ff6699', '#ff88aa', '#ff66b5', '#ff77aa', '#ff5e8e', '#ff99bb', '#ff6b81', '#ff8da1'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        const fontSize = Math.random() * 18 + 18;
+        
+        span.style.left = e.clientX + 'px';
+        span.style.top = (e.clientY - 15) + 'px';
+        span.style.fontSize = fontSize + 'px';
+        span.style.color = randomColor;
+        span.style.textShadow = '0 0 8px #fff, 0 0 5px #ffb3d9';
+        span.style.fontFamily = "'Segoe UI', 'PingFang SC', cursive";
+        
+        document.body.appendChild(span);
+        
+        setTimeout(() => span.remove(), 1400);
+    });
+    
+    // ========== 视频加载失败时的优雅提示 ==========
+    video.addEventListener('error', () => {
+        const errorMsg = document.createElement('div');
+        errorMsg.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: #ff96ff;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 12px;
+            text-align: center;
+            white-space: nowrap;
+            z-index: 10;
+        `;
+        errorMsg.innerHTML = '💔 视频加载失败 💔<br>点击下方按钮继续';
+        video.parentElement.style.position = 'relative';
+        video.parentElement.appendChild(errorMsg);
+        
+        setTimeout(() => {
+            if (errorMsg.parentElement) errorMsg.remove();
+        }, 3000);
+    });
+    
+    // ========== 页面可见性变化时保持视频播放状态 ==========
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && video.paused && !video.ended) {
+            video.play().catch(() => {});
+        }
+    });
+    
+    // ========== 控制台浪漫输出 ==========
+    console.log('%c💖 专属放映厅已开启 💖', 'color: #ff6b81; font-size: 16px; font-weight: bold;');
+    console.log('%c🎬 点击视频或按钮控制播放，点击屏幕出现甜蜜文字 🎬', 'color: #ff99bb; font-size: 12px;');
+    
+    // ========== 按钮波纹效果 ==========
+    const buttons = document.querySelectorAll('.btn-romantic');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.6);
+                width: 80px;
+                height: 80px;
+                margin-top: -40px;
+                margin-left: -40px;
+                transform: scale(0);
+                animation: ripple 0.5s ease-out;
+                pointer-events: none;
+            `;
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 500);
+        });
+    });
+    
+    // 添加波纹动画样式
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 确保视频容器高度自适应，防止溢出
+    function adjustLayout() {
+        const container = document.querySelector('.video-container');
+        const videoWrapper = document.querySelector('.video-wrapper');
+        if (container && videoWrapper) {
+            // 确保容器高度不会溢出
+            const windowHeight = window.innerHeight;
+            const containerHeight = container.scrollHeight;
+            if (containerHeight > windowHeight) {
+                // 如果内容超出，稍微调整视频高度
+                const video = document.querySelector('video');
+                if (video) {
+                    const maxHeight = windowHeight * 0.5;
+                    video.style.maxHeight = maxHeight + 'px';
+                }
+            }
+        }
+    }
+    
+    window.addEventListener('resize', adjustLayout);
+    setTimeout(adjustLayout, 100);
+</script>
+
+<!-- 额外样式优化 -->
+<style>
+    /* 确保完美铺满无滚动 */
+    body {
+        overflow: hidden;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+    
+    .video-container {
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .video-container::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* 视频控制栏样式 */
+    video::-webkit-media-controls {
+        z-index: 20;
+    }
+    
+    /* 数字等宽 */
+    #timer {
+        font-feature-settings: "tnum";
+        font-variant-numeric: tabular-nums;
+    }
+    
+    /* 确保按钮点击区域正常 */
+    .btn-romantic {
+        cursor: pointer;
+    }
+    
+    a {
+        display: inline-block;
+    }
+    
+    /* 优雅过渡 */
+    .btn-romantic, .video-wrapper, video {
+        transition: all 0.3s ease;
+    }
+</style>
+</body>
+</html>
