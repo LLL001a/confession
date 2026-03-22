@@ -1,6 +1,7 @@
 
 # 表白网站confession
 ### 一个纯静态的表白/求婚网站，5个页面循序渐进，用文字、视频与照片墙传递心意。
+**示例页面**：https://lll001a.github.io/confession/
 
 ## 项目结构
 ```text
@@ -23,7 +24,6 @@ confess/
 1.  **下载源码**：克隆或下载本项目到本地。
 2.  **部署**：将整个文件夹上传到 Web 服务器（Nginx/Apache/静态托管平台），或直接在本地用浏览器打开 `index.html` 预览。
 3.  **访问**：通过服务器地址访问根目录 `index.html`，即可浏览完整表白流程。
-4.  **示例页面**：https://lll001a.github.io/confess/
 
 ---
 
