@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>嫁给我（和我在一起）吧 · XX宝贝</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            height: 100vh;
+            width: 100%;
+            background: linear-gradient(145deg, #ffb6c1 0%, #ff9eb5 40%, #ff85a1 100%);
+            font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        /* 动态漂浮爱心背景 */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .heart-float {
+            position: absolute;
+            bottom: -40px;
+            background: rgba(255, 245, 245, 0.7);
+            width: 20px;
+            height: 20px;
+            transform: rotate(45deg);
+            animation: floatUp 8s linear infinite;
+            opacity: 0.6;
+        }
+
+        .heart-float::before,
+        .heart-float::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .heart-float::before {
+            top: -10px;
+            left: 0;
+        }
+
+        .heart-float::after {
+            top: 0;
+            left: -10px;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(45deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-120vh) rotate(45deg);
+                opacity: 0;
+            }
+        }
+        
+        /* 音乐播放器 - 精致卡片 */
+        .music-card {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 100;
+            background: rgba(255, 245, 240, 0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 50px;
+            padding: 6px 14px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .music-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+        }
+
+        .music-icon {
+            font-size: 24px;
+            animation: musicWave 1.5s ease-in-out infinite;
+        }
+
+        @keyframes musicWave {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .music-info {
+            font-size: 12px;
+            font-weight: 500;
+            color: #c44569;
+        }
+
+        .music-info small {
+            font-size: 10px;
+            color: #ff8899;
+            display: block;
+        }
+
+        .music-control {
+            background: #ff6b81;
+            border: none;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .music-control:hover {
+            background: #ff4d6d;
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 768px) {
+            .music-card {
+                top: 8px;
+                right: 8px;
+                padding: 5px 10px;
+            }
+            .music-icon { font-size: 20px; }
+            .music-info { font-size: 10px; }
+            .music-control { padding: 2px 8px; font-size: 9px; }
+        }
+
+        audio {
+            display: none;
+        }
+
+        /* 主卡片 - 完美铺满不滚动 */
+        .card {
+            position: relative;
+            z-index: 20;
+            width: 90%;
+            max-width: 550px;
+            background: rgba(255, 250, 240, 0.95);
+            backdrop-filter: blur(3px);
+            border-radius: 48px;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255,255,255,0.6);
+            transition: transform 0.3s ease;
+            animation: cardGlow 2s infinite alternate;
+            display: flex;
+            flex-direction: column;
+            max-height: 95vh;
+            overflow: hidden;
+        }
+
+        @keyframes cardGlow {
+            0% { box-shadow: 0 30px 50px rgba(0,0,0,0.2), 0 0 0 0 rgba(255,105,130,0.3); }
+            100% { box-shadow: 0 35px 55px rgba(0,0,0,0.25), 0 0 0 12px rgba(255,105,130,0.2); }
+        }
+
+        /* 顶部装饰 */
+        .hero {
+            background: linear-gradient(135deg, #ff758c, #ff4d6d);
+            padding: 20px 16px 18px;
+            text-align: center;
+            color: white;
+            clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
+            flex-shrink: 0;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.3rem, 5vw, 1.9rem);
+            letter-spacing: 2px;
+            font-weight: 700;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            margin-bottom: 5px;
+            display: inline-block;
+            animation: gentleShake 2s ease infinite;
+        }
+
+        @keyframes gentleShake {
+            0%,100%{ transform: translateY(0);}
+            50%{ transform: translateY(-3px);}
+        }
+
+        .hero p {
+            font-size: 0.8rem;
+            opacity: 0.95;
+            font-style: italic;
+        }
+
+        /* 情书内容区 - 可滚动但适配高度 */
+        .message-box {
+            padding: 18px 22px 12px;
+            background: #fffef7;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .message-box::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .message-box::-webkit-scrollbar-track {
+            background: #ffe0e8;
+            border-radius: 10px;
+        }
+
+        .message-box::-webkit-scrollbar-thumb {
+            background: #ff80b3;
+            border-radius: 10px;
+        }
+
+        .greeting {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #c44569;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .greeting span {
+            background: #ffecf0;
+            padding: 3px 8px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+        }
+
+        .poem {
+            font-size: 0.88rem;
+            line-height: 1.55;
+            color: #2d2f36;
+            background: #fffaf2;
+            padding: 12px 14px;
+            border-radius: 28px;
+            margin: 10px 0;
+            box-shadow: inset 0 1px 4px #ffe3e8, 0 8px 20px rgba(0,0,0,0.03);
+            border: 1px solid #ffe2e6;
+        }
+
+        .poem p {
+            margin: 6px 0;
+        }
+
+        .signature {
+            text-align: right;
+            margin-top: 10px;
+            font-family: 'Brush Script MT', cursive, 'Segoe UI';
+            font-size: 1.2rem;
+            color: #ff6b81;
+            border-top: 2px dashed #ffccd5;
+            padding-top: 10px;
+        }
+
+        /* 按钮区域 */
+        .action-area {
+            padding: 10px 22px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            background: #fffef7;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 10px 24px;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+            font-family: inherit;
+            letter-spacing: 1px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .btn-accept {
+            background: #ff6b81;
+            color: white;
+            box-shadow: 0 6px 0 #b23c50;
+            position: relative;
+            z-index: 100;
+        }
+
+        .btn-accept:hover {
+            background: #ff4d6d;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #b23c50;
+        }
+
+        .btn-accept:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #b23c50;
+        }
+
+        .btn-deny {
+            background: #e0e4e8;
+            color: #5c5f6b;
+            box-shadow: 0 6px 0 #a6aab2;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .btn-deny:hover {
+            background: #d0d4dc;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #a6aab2;
+        }
+
+        .btn-deny:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #a6aab2;
+        }
+
+        /* 逃跑中的拒绝按钮样式 */
+        .btn-deny-fleeing {
+            position: fixed;
+            z-index: 1000;
+            background: #e0e4e8;
+            color: #5c5f6b;
+            box-shadow: 0 6px 0 #a6aab2;
+            border: none;
+            font-weight: bold;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.34, 1.2, 0.8, 1);
+            will-change: transform, left, top;
+            font-family: inherit;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            font-size: 1rem;
+            padding: 10px 24px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #fffaf2;
+            max-width: 280px;
+            width: 80%;
+            border-radius: 48px;
+            padding: 24px 16px 30px;
+            text-align: center;
+            box-shadow: 0 30px 40px rgba(0,0,0,0.3);
+            border: 1px solid #ffb7c3;
+            transform: scale(0.9);
+            transition: transform 0.2s cubic-bezier(0.34, 1.2, 0.8, 1);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-content h3 {
+            font-size: 1.6rem;
+            color: #ff4d6d;
+            margin-bottom: 10px;
+        }
+
+        .modal-content p {
+            font-size: 0.9rem;
+            color: #3b2c2f;
+            margin-bottom: 18px;
+        }
+
+        .modal-close {
+            background: #ff6b81;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .modal-close:active {
+            transform: scale(0.96);
+        }
+
+        /* 提示气泡样式 */
+        .tip-bubble {
+            position: fixed;
+            background: #ffecf0;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #c44569;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+            z-index: 10000;
+            white-space: nowrap;
+            font-family: inherit;
+            animation: bubblePop 0.3s ease-out;
+            border: 1px solid #ffb7c3;
+        }
+
+        @keyframes bubblePop {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* 可爱的小装饰 */
+        .cute-star {
+            position: absolute;
+            font-size: 18px;
+            pointer-events: none;
+            z-index: 25;
+            opacity: 0;
+            animation: starPop 0.6s ease-out forwards;
+        }
+
+        @keyframes starPop {
+            0% { opacity: 1; transform: scale(0.2) rotate(0deg); }
+            100% { opacity: 0; transform: scale(1.5) rotate(180deg); }
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.6rem;
+            background: #fffef7;
+            padding: 8px 0 12px;
+            color: #e2a1b0;
+            flex-shrink: 0;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 600px) {
+            .card {
+                width: 92%;
+                border-radius: 36px;
+            }
+            .hero {
+                padding: 16px 12px 14px;
+            }
+            .hero h1 {
+                font-size: 1.2rem;
+            }
+            .hero p {
+                font-size: 0.7rem;
+            }
+            .message-box {
+                padding: 14px 16px 10px;
+            }
+            .greeting {
+                font-size: 1rem;
+                margin-bottom: 8px;
+            }
+            .poem {
+                font-size: 0.8rem;
+                padding: 10px 12px;
+                margin: 8px 0;
+            }
+            .poem p {
+                margin: 4px 0;
+            }
+            .signature {
+                font-size: 1rem;
+                padding-top: 8px;
+                margin-top: 8px;
+            }
+            .action-area {
+                padding: 8px 16px 16px;
+                gap: 12px;
+            }
+            .btn {
+                padding: 8px 18px;
+                font-size: 0.9rem;
+            }
+            .btn-deny-fleeing {
+                font-size: 0.9rem;
+                padding: 8px 18px;
+            }
+            footer {
+                padding: 6px 0 10px;
+                font-size: 0.55rem;
+            }
+            .tip-bubble {
+                padding: 4px 10px;
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .btn {
+                padding: 7px 14px;
+                font-size: 0.85rem;
+            }
+            .btn-deny-fleeing {
+                font-size: 0.85rem;
+                padding: 7px 14px;
+            }
+            .hero h1 {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="floating-hearts" id="heartCanvas"></div>
+
+<!-- 音乐播放器 -->
+<div class="music-card" id="musicCard">
+    <div class="music-icon">🎵</div>
+    <div class="music-info">
+        浪漫旋律
+        <small>专属我们的歌</small>
+    </div>
+    <button class="music-control" id="musicToggle">播放</button>
+</div>
+
+<audio id="bgMusic" loop preload="auto">
+    <source src="https://music.163.com/song/media/outer/url?id=34341360.mp3" type="audio/mpeg">
+</audio>
+
+<div class="card">
+    <div class="hero">
+        <h1>💍 嫁 给 我（在一起） 好 吗 💍</h1>
+        <p>这一生最重要的一句话，只想对你说</p>
+    </div>
+    <div class="message-box">
+        <div class="greeting">
+            💕 我最爱的 <span>XX宝贝</span> 💕
+        </div>
+        <div class="poem">
+            <p>✨ 从遇见你的那一刻起，</p>
+            <p>✨ 我的世界便被温柔填满。</p>
+            <p>🌙 你的笑容是我每天最期待的风景，</p>
+            <p>🌙 你的声音是我听过最美的旋律。</p>
+            <p>🍃 我想和你一起看日出日落，</p>
+            <p>🍃 想和你一起走过春夏秋冬，</p>
+            <p>💍 想用余生守护你的每一个笑容。</p>
+            <p style="font-weight: bold; color:#ff4d6d; margin-top: 8px; font-size: 1rem;">“XX，嫁给我（在一起）好吗？”</p>
+        </div>
+        <div class="signature">
+            —— 永远爱你的 XX
+        </div>
+    </div>
+    <div class="action-area" id="actionArea">
+        <button class="btn btn-accept" id="acceptBtn">💍 我愿意 💍</button>
+        <button class="btn btn-deny" id="denyBtn">😢 再想想...</button>
+    </div>
+    <footer>⚡ 点击「我愿意」会收到超甜惊喜哟 ⚡</footer>
+</div>
+
+<!-- 逃跑的拒绝按钮副本（动态） -->
+<button class="btn-deny-fleeing" id="denyBtnFleeing" style="display: none;">😢 再想想...</button>
+
+<!-- 弹窗模态框 -->
+<div id="modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>💖 我愿意！ 💖</h3>
+        <p>这是我听过最美好的回答！<br>从今往后，让我用一生来爱你、宠你、守护你✨</p>
+        <button class="modal-close" id="closeModalBtn">抱抱我的新娘（宝贝） 🫂</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ========== 音乐播放器控制（渐强效果） ==========
+        const audio = document.getElementById('bgMusic');
+        const musicToggle = document.getElementById('musicToggle');
+        let isPlaying = false;
+        let fadeAnimationId = null;
+        const targetVolume = 0.38;
+        
+        audio.volume = 0;
+        
+        function fadeInAudio(duration = 2800) {
+            if (fadeAnimationId) cancelAnimationFrame(fadeAnimationId);
+            const startVolume = audio.volume;
+            const startTime = performance.now();
+            
+            function step(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const newVolume = startVolume + (targetVolume - startVolume) * easeProgress;
+                audio.volume = Math.min(targetVolume, newVolume);
+                if (progress < 1) fadeAnimationId = requestAnimationFrame(step);
+                else fadeAnimationId = null;
+            }
+            fadeAnimationId = requestAnimationFrame(step);
+        }
+        
+        function fadeOutAudio(duration = 800, callback) {
+            if (fadeAnimationId) cancelAnimationFrame(fadeAnimationId);
+            const startVolume = audio.volume;
+            const startTime = performance.now();
+            
+            function step(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const newVolume = startVolume * (1 - progress);
+                audio.volume = Math.max(0, newVolume);
+                if (progress < 1) fadeAnimationId = requestAnimationFrame(step);
+                else {
+                    audio.pause();
+                    audio.volume = 0;
+                    fadeAnimationId = null;
+                    if (callback) callback();
+                }
+            }
+            fadeAnimationId = requestAnimationFrame(step);
+        }
+        
+        function playMusicWithFade() {
+            if (audio.paused) {
+                audio.volume = 0;
+                audio.play().then(() => fadeInAudio(2500)).catch(() => {});
+            } else {
+                fadeInAudio(1500);
+            }
+        }
+        
+        function pauseMusicWithFade() {
+            if (!audio.paused) fadeOutAudio(800);
+        }
+        
+        musicToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isPlaying) {
+                pauseMusicWithFade();
+                musicToggle.textContent = '播放';
+                isPlaying = false;
+            } else {
+                playMusicWithFade();
+                musicToggle.textContent = '暂停';
+                isPlaying = true;
+            }
+        });
+        
+        let hasPlayed = false;
+        function tryAutoPlay() {
+            if (!hasPlayed && audio.paused) {
+                playMusicWithFade();
+                musicToggle.textContent = '暂停';
+                isPlaying = true;
+                hasPlayed = true;
+            }
+        }
+        document.body.addEventListener('click', tryAutoPlay);
+        document.body.addEventListener('touchstart', tryAutoPlay);
+        
+        // ========== 调皮提示文字库 ==========
+        const tipMessages = [
+            '诶？抓不到我~ 😜', '再考虑一下嘛✨', '点我呀 >_<', '不行！不能拒绝~ 💕',
+            '我超难抓的', '❤️ 别点这里啦', '来追我呀~', '😝 点不到点不到',
+            '嫁给他！嫁给他！💍', '快答应他吧~ 💖'
+        ];
+        
+        function showTipBubble(x, y, message) {
+            const bubble = document.createElement('div');
+            bubble.className = 'tip-bubble';
+            bubble.textContent = message;
+            bubble.style.left = (x + 15) + 'px';
+            bubble.style.top = (y - 40) + 'px';
+            document.body.appendChild(bubble);
+            setTimeout(() => {
+                bubble.style.transition = 'opacity 0.3s';
+                bubble.style.opacity = '0';
+                setTimeout(() => bubble.remove(), 300);
+            }, 1000);
+        }
+        
+        function getRandomTip() {
+            return tipMessages[Math.floor(Math.random() * tipMessages.length)];
+        }
+        
+        // 动态漂浮爱心
+        const heartsContainer = document.getElementById('heartCanvas');
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart-float');
+            const size = Math.random() * 18 + 10;
+            heart.style.width = size + 'px';
+            heart.style.height = size + 'px';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDuration = Math.random() * 5 + 4 + 's';
+            heart.style.animationDelay = Math.random() * 4 + 's';
+            heart.style.background = `rgba(255, 210, 220, ${Math.random() * 0.5 + 0.3})`;
+            heartsContainer.appendChild(heart);
+            heart.addEventListener('animationend', () => heart.remove());
+        }
+        for(let i = 0; i < 18; i++) setTimeout(() => createFloatingHeart(), i * 200);
+        setInterval(() => { if (heartsContainer.children.length < 50) createFloatingHeart(); }, 1500);
+
+        // 小星星特效
+        function createSparkle(x, y) {
+            const star = document.createElement('div');
+            star.classList.add('cute-star');
+            star.innerHTML = ['❤️', '✨', '💖', '🌸', '⭐', '💗', '🎉', '💍'][Math.floor(Math.random() * 8)];
+            star.style.left = (x - 12) + 'px';
+            star.style.top = (y - 12) + 'px';
+            star.style.position = 'fixed';
+            star.style.fontSize = Math.random() * 18 + 14 + 'px';
+            star.style.pointerEvents = 'none';
+            star.style.zIndex = '9999';
+            document.body.appendChild(star);
+            setTimeout(() => star.remove(), 600);
+        }
+
+        function burstConfettiLike(x, y, count = 14) {
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const star = document.createElement('div');
+                    star.classList.add('cute-star');
+                    star.innerHTML = ['❤️', '💖', '✨', '⭐', '🌸', '💞', '🎀', '💍'][Math.floor(Math.random() * 8)];
+                    const offX = (Math.random() - 0.5) * 100;
+                    const offY = (Math.random() - 0.5) * 80 - 20;
+                    star.style.left = (x + offX) + 'px';
+                    star.style.top = (y + offY) + 'px';
+                    star.style.fontSize = Math.random() * 20 + 12 + 'px';
+                    star.style.position = 'fixed';
+                    star.style.zIndex = '9999';
+                    document.body.appendChild(star);
+                    setTimeout(() => star.remove(), 800);
+                }, i * 25);
+            }
+        }
+
+        // 获取元素
+        const acceptBtn = document.getElementById('acceptBtn');
+        const denyBtnStatic = document.getElementById('denyBtn');
+        const denyBtnFleeing = document.getElementById('denyBtnFleeing');
+        const modal = document.getElementById('modal');
+        const closeModal = document.getElementById('closeModalBtn');
+        
+        let isAccepted = false;
+        let isEvading = false;
+        let lastTipTime = 0;
+        let fleeingActive = false;
+        
+        function getSafePosition(left, top, btnWidth, btnHeight) {
+            const padding = 15;
+            let safeLeft = Math.max(padding, Math.min(left, window.innerWidth - btnWidth - padding));
+            let safeTop = Math.max(padding, Math.min(top, window.innerHeight - btnHeight - padding));
+            return { left: safeLeft, top: safeTop };
+        }
+        
+        function copyButtonStyles(source, target) {
+            const styles = window.getComputedStyle(source);
+            target.style.fontSize = styles.fontSize;
+            target.style.fontWeight = styles.fontWeight;
+            target.style.padding = styles.padding;
+            target.style.borderRadius = styles.borderRadius;
+            target.style.boxShadow = styles.boxShadow;
+            target.style.fontFamily = styles.fontFamily;
+            target.style.letterSpacing = styles.letterSpacing;
+            target.textContent = source.textContent;
+        }
+        
+        function activateFleeMode() {
+            if (fleeingActive || isAccepted) return;
+            fleeingActive = true;
+            const staticRect = denyBtnStatic.getBoundingClientRect();
+            copyButtonStyles(denyBtnStatic, denyBtnFleeing);
+            denyBtnFleeing.style.display = 'flex';
+            denyBtnFleeing.style.left = staticRect.left + 'px';
+            denyBtnFleeing.style.top = staticRect.top + 'px';
+            denyBtnFleeing.style.width = staticRect.width + 'px';
+            denyBtnFleeing.style.height = staticRect.height + 'px';
+            denyBtnStatic.style.visibility = 'hidden';
+            denyBtnStatic.style.opacity = '0';
+            denyBtnStatic.style.pointerEvents = 'none';
+        }
+        
+        function evadeDenyButton(triggerX, triggerY) {
+            if (isAccepted || modal.classList.contains('active') || isEvading) return false;
+            if (!fleeingActive) activateFleeMode();
+            isEvading = true;
+            const btnWidth = denyBtnFleeing.offsetWidth;
+            const btnHeight = denyBtnFleeing.offsetHeight;
+            let randomLeft = Math.random() * (window.innerWidth - btnWidth - 40) + 20;
+            let randomTop = Math.random() * (window.innerHeight - btnHeight - 40) + 20;
+            if (triggerX && triggerY) {
+                const distance = Math.hypot(randomLeft + btnWidth/2 - triggerX, randomTop + btnHeight/2 - triggerY);
+                if (distance < 150) {
+                    const angle = Math.random() * Math.PI * 2;
+                    randomLeft = triggerX + Math.cos(angle) * 200 - btnWidth/2;
+                    randomTop = triggerY + Math.sin(angle) * 200 - btnHeight/2;
+                }
+            }
+            const safePos = getSafePosition(randomLeft, randomTop, btnWidth, btnHeight);
+            denyBtnFleeing.style.left = safePos.left + 'px';
+            denyBtnFleeing.style.top = safePos.top + 'px';
+            denyBtnFleeing.style.transform = 'scale(0.95)';
+            setTimeout(() => denyBtnFleeing.style.transform = '', 150);
+            if (triggerX && triggerY) {
+                const now = Date.now();
+                if (now - lastTipTime > 600) {
+                    showTipBubble(triggerX, triggerY, getRandomTip());
+                    lastTipTime = now;
+                }
+                createSparkle(triggerX, triggerY);
+            }
+            setTimeout(() => { isEvading = false; }, 200);
+            return true;
+        }
+        
+        function onDenyClick(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            if (isAccepted || modal.classList.contains('active')) return;
+            let clientX, clientY;
+            if (e.touches && e.touches[0]) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+            else if (e.changedTouches && e.changedTouches[0]) { clientX = e.changedTouches[0].clientX; clientY = e.changedTouches[0].clientY; }
+            else { clientX = e.clientX; clientY = e.clientY; }
+            evadeDenyButton(clientX, clientY);
+        }
+        
+        function onAccept() {
+            if (isAccepted) return;
+            isAccepted = true;
+            modal.classList.add('active');
+            for(let i=0; i<100; i++) {
+                setTimeout(() => {
+                    createSparkle(Math.random() * window.innerWidth, Math.random() * window.innerHeight);
+                }, i * 15);
+            }
+            burstConfettiLike(window.innerWidth/2, window.innerHeight/2, 60);
+            denyBtnStatic.style.display = 'none';
+            denyBtnFleeing.style.display = 'none';
+        }
+        
+        function closeModalFunc() { modal.classList.remove('active'); }
+        
+        function onPointerMove(e) {
+            if (isAccepted || modal.classList.contains('active') || isEvading) return;
+            let clientX, clientY;
+            if (e.touches) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+            else { clientX = e.clientX; clientY = e.clientY; }
+            let currentBtn = fleeingActive ? denyBtnFleeing : denyBtnStatic;
+            if (!currentBtn || currentBtn.style.display === 'none') return;
+            const btnRect = currentBtn.getBoundingClientRect();
+            if (btnRect.width === 0) return;
+            const distance = Math.hypot(clientX - (btnRect.left + btnRect.width/2), clientY - (btnRect.top + btnRect.height/2));
+            if (distance < 130) evadeDenyButton(clientX, clientY);
+        }
+        
+        denyBtnStatic.addEventListener('click', onDenyClick);
+        denyBtnStatic.addEventListener('touchstart', (e) => { e.preventDefault(); onDenyClick(e); });
+        denyBtnFleeing.addEventListener('click', onDenyClick);
+        denyBtnFleeing.addEventListener('touchstart', (e) => { e.preventDefault(); onDenyClick(e); });
+        acceptBtn.addEventListener('click', onAccept);
+        closeModal.addEventListener('click', closeModalFunc);
+        modal.addEventListener('click', (e) => { if(e.target === modal) closeModalFunc(); });
+        document.addEventListener('mousemove', onPointerMove);
+        document.addEventListener('touchmove', onPointerMove);
+        
+        window.addEventListener('resize', () => {
+            if (fleeingActive && !isAccepted) {
+                const btnWidth = denyBtnFleeing.offsetWidth;
+                const btnHeight = denyBtnFleeing.offsetHeight;
+                const safePos = getSafePosition(20, window.innerHeight/2 - btnHeight/2, btnWidth, btnHeight);
+                denyBtnFleeing.style.left = safePos.left + 'px';
+                denyBtnFleeing.style.top = safePos.top + 'px';
+            }
+        });
+        
+        document.querySelector('.card').addEventListener('click', (e) => {
+            if (e.target === acceptBtn || e.target === denyBtnStatic || e.target === denyBtnFleeing) return;
+            createSparkle(e.clientX, e.clientY);
+        });
+        document.querySelector('.card').addEventListener('touchstart', (e) => {
+            let target = e.target;
+            if (target === acceptBtn || target === denyBtnStatic || target === denyBtnFleeing) return;
+            const touch = e.touches[0];
+            if (touch) createSparkle(touch.clientX, touch.clientY);
+        });
+        
+        setTimeout(() => {
+            const welcomeHeart = document.createElement('div');
+            welcomeHeart.innerText = '💍 XX，嫁给我（和我在一起）吧 💍';
+            welcomeHeart.style.position = 'fixed';
+            welcomeHeart.style.bottom = '15px';
+            welcomeHeart.style.left = '15px';
+            welcomeHeart.style.background = 'rgba(255,225,230,0.95)';
+            welcomeHeart.style.padding = '5px 12px';
+            welcomeHeart.style.borderRadius = '40px';
+            welcomeHeart.style.fontSize = '11px';
+            welcomeHeart.style.fontWeight = 'bold';
+            welcomeHeart.style.color = '#c44569';
+            welcomeHeart.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            welcomeHeart.style.zIndex = '100';
+            welcomeHeart.style.pointerEvents = 'none';
+            document.body.appendChild(welcomeHeart);
+            setTimeout(() => welcomeHeart.remove(), 4000);
+        }, 800);
+        
+        console.log('💍 求婚页面已加载，完美铺满屏幕，拒绝按钮会机智躲避！💍');
+    })();
+</script>
+</body>
+</html>
