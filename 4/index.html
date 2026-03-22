@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>时光放映机 · 浪漫旋转相册 | 与你有关的每一帧</title>
+    <style>
+        /* ========== 全局样式 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #ffb6c1 0%, #ff9eb5 40%, #ff85a1 100%);
+            font-family: 'Segoe UI', 'Quicksand', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 动态漂浮爱心背景 */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            bottom: -40px;
+            background: rgba(255, 240, 245, 0.7);
+            transform: rotate(45deg);
+            animation: floatUp linear infinite;
+            opacity: 0.6;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .heart::before {
+            top: -50%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .heart::after {
+            top: 0;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(45deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-120vh) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        /* 主容器 */
+        .romance-container {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 20px 20px 40px;
+        }
+
+        /* 浪漫标题卡片 */
+        .title-section {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: titleFloat 2s ease-in-out infinite;
+        }
+
+        .title-section h1 {
+            font-size: clamp(1.6rem, 7vw, 2.4rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #ffeef4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            letter-spacing: 3px;
+        }
+
+        .title-section p {
+            font-size: clamp(0.8rem, 3.5vw, 1rem);
+            color: rgba(255, 255, 255, 0.92);
+            margin-top: 8px;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* 音乐播放器 - 精致置顶卡片 */
+        .music-card {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 100;
+            background: rgba(255, 245, 240, 0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 50px;
+            padding: 8px 16px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .music-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+        }
+
+        .music-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .music-icon {
+            font-size: 28px;
+            animation: musicWave 1.5s ease-in-out infinite;
+        }
+
+        @keyframes musicWave {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .music-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #c44569;
+        }
+
+        .music-text small {
+            font-size: 11px;
+            color: #ff8899;
+            display: block;
+        }
+
+        audio {
+            display: none;
+        }
+
+        /* 自定义音乐控制按钮 */
+        .music-control {
+            background: #ff6b81;
+            border: none;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .music-control:hover {
+            background: #ff4d6d;
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 768px) {
+            .music-card {
+                top: 8px;
+                right: 8px;
+                padding: 6px 12px;
+            }
+            .music-icon { font-size: 22px; }
+            .music-text { font-size: 11px; }
+            .music-control { padding: 2px 8px; font-size: 10px; }
+        }
+
+        /* 3D旋转相册容器 */
+        .album-wrapper {
+            perspective: 1200px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .photo-sphere {
+            position: relative;
+            width: min(200px, 52vw);
+            height: min(300px, 78vw);
+            transform-style: preserve-3d;
+            animation: rotateAlbum 35s linear infinite;
+            cursor: grab;
+            transition: animation-play-state 0.2s;
+        }
+
+        .photo-sphere:active {
+            cursor: grabbing;
+        }
+
+        .photo-sphere.paused {
+            animation-play-state: paused;
+        }
+
+        @keyframes rotateAlbum {
+            0% { transform: rotateY(0deg) rotateX(2deg); }
+            100% { transform: rotateY(360deg) rotateX(2deg); }
+        }
+
+        .photo-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), 0 0 0 3px rgba(255, 255, 255, 0.6), 0 0 0 7px rgba(255, 200, 220, 0.4);
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            background: linear-gradient(145deg, #fff8fa, #ffeef4);
+        }
+
+        .photo-card:hover {
+            transform: scale(1.08) translateZ(25px);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35), 0 0 0 4px #ffb6e6, 0 0 0 12px rgba(255, 182, 230, 0.5);
+            z-index: 20;
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .photo-card:hover img {
+            transform: scale(1.06);
+        }
+
+        /* 照片位置 - 响应式半径 */
+        @media (min-width: 1200px) {
+            .photo-sphere { width: 180px; height: 270px; }
+            .photo-card[data-pos="0"] { transform: rotateY(36deg) translateZ(310px); }
+            .photo-card[data-pos="1"] { transform: rotateY(72deg) translateZ(310px); }
+            .photo-card[data-pos="2"] { transform: rotateY(108deg) translateZ(310px); }
+            .photo-card[data-pos="3"] { transform: rotateY(144deg) translateZ(310px); }
+            .photo-card[data-pos="4"] { transform: rotateY(180deg) translateZ(310px); }
+            .photo-card[data-pos="5"] { transform: rotateY(216deg) translateZ(310px); }
+            .photo-card[data-pos="6"] { transform: rotateY(252deg) translateZ(310px); }
+            .photo-card[data-pos="7"] { transform: rotateY(288deg) translateZ(310px); }
+            .photo-card[data-pos="8"] { transform: rotateY(324deg) translateZ(310px); }
+            .photo-card[data-pos="9"] { transform: rotateY(360deg) translateZ(310px); }
+        }
+
+        @media (min-width: 768px) and (max-width: 1199px) {
+            .photo-sphere { width: 165px; height: 248px; }
+            .photo-card[data-pos="0"] { transform: rotateY(36deg) translateZ(285px); }
+            .photo-card[data-pos="1"] { transform: rotateY(72deg) translateZ(285px); }
+            .photo-card[data-pos="2"] { transform: rotateY(108deg) translateZ(285px); }
+            .photo-card[data-pos="3"] { transform: rotateY(144deg) translateZ(285px); }
+            .photo-card[data-pos="4"] { transform: rotateY(180deg) translateZ(285px); }
+            .photo-card[data-pos="5"] { transform: rotateY(216deg) translateZ(285px); }
+            .photo-card[data-pos="6"] { transform: rotateY(252deg) translateZ(285px); }
+            .photo-card[data-pos="7"] { transform: rotateY(288deg) translateZ(285px); }
+            .photo-card[data-pos="8"] { transform: rotateY(324deg) translateZ(285px); }
+            .photo-card[data-pos="9"] { transform: rotateY(360deg) translateZ(285px); }
+        }
+
+        @media (max-width: 767px) {
+            .photo-sphere { width: 140px; height: 210px; }
+            .photo-card[data-pos="0"] { transform: rotateY(36deg) translateZ(240px); }
+            .photo-card[data-pos="1"] { transform: rotateY(72deg) translateZ(240px); }
+            .photo-card[data-pos="2"] { transform: rotateY(108deg) translateZ(240px); }
+            .photo-card[data-pos="3"] { transform: rotateY(144deg) translateZ(240px); }
+            .photo-card[data-pos="4"] { transform: rotateY(180deg) translateZ(240px); }
+            .photo-card[data-pos="5"] { transform: rotateY(216deg) translateZ(240px); }
+            .photo-card[data-pos="6"] { transform: rotateY(252deg) translateZ(240px); }
+            .photo-card[data-pos="7"] { transform: rotateY(288deg) translateZ(240px); }
+            .photo-card[data-pos="8"] { transform: rotateY(324deg) translateZ(240px); }
+            .photo-card[data-pos="9"] { transform: rotateY(360deg) translateZ(240px); }
+        }
+
+        /* 浪漫按钮 */
+        .action-area {
+            margin: 25px auto 15px;
+            text-align: center;
+        }
+
+        .btn-romantic {
+            background: linear-gradient(135deg, #ff6b81, #ff4d6d);
+            border: none;
+            padding: 12px 48px;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 0 #b23c50;
+            font-family: inherit;
+            letter-spacing: 2px;
+        }
+
+        .btn-romantic:hover {
+            background: linear-gradient(135deg, #ff4d6d, #ff3355);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 0 #b23c50;
+        }
+
+        .btn-romantic:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #b23c50;
+        }
+
+        /* 倒计时卡片 */
+        .countdown-card {
+            background: rgba(255, 250, 240, 0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 60px;
+            padding: 8px 28px;
+            margin: 12px auto 15px;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 10px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            color: #c44569;
+            font-weight: bold;
+        }
+
+        .countdown-card .time-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ff3366;
+            background: white;
+            padding: 0 16px;
+            border-radius: 50px;
+            min-width: 80px;
+            display: inline-block;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .countdown-card .time-label {
+            font-size: 0.9rem;
+            color: #b34e71;
+        }
+
+        @media (max-width: 480px) {
+            .btn-romantic {
+                padding: 9px 36px;
+                font-size: 0.95rem;
+            }
+            .countdown-card {
+                padding: 6px 20px;
+            }
+            .countdown-card .time-number {
+                font-size: 1.5rem;
+                min-width: 65px;
+                padding: 0 10px;
+            }
+            .countdown-card .time-label {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* 点击漂浮文字特效 */
+        .floating-love {
+            position: fixed;
+            pointer-events: none;
+            z-index: 99999;
+            font-weight: bold;
+            white-space: nowrap;
+            animation: floatAway 1.5s ease-out forwards;
+        }
+
+        @keyframes floatAway {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.4) rotate(0deg);
+            }
+            30% {
+                opacity: 0.95;
+                transform: translateY(-30px) scale(1.15) rotate(6deg);
+            }
+            70% {
+                opacity: 0.6;
+                transform: translateY(-85px) scale(0.95) rotate(-3deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-150px) scale(0.7) rotate(5deg);
+            }
+        }
+
+        /* 底部装饰 */
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 1px;
+        }
+
+        /* 悬浮提示 */
+        .hover-tip {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(255, 240, 245, 0.88);
+            backdrop-filter: blur(6px);
+            color: #c44569;
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 11px;
+            z-index: 1000;
+            pointer-events: none;
+            font-family: inherit;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .hover-tip {
+                bottom: 8px;
+                left: 8px;
+                font-size: 9px;
+                padding: 3px 10px;
+            }
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #ffe0e8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff80b3;
+            border-radius: 10px;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* 加载完成后的动画 */
+        .photo-card {
+            animation: fadeInScale 0.5s ease backwards;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 动态漂浮爱心背景 -->
+<div class="floating-hearts" id="heartCanvas"></div>
+
+<!-- 音乐播放器 - 精致卡片 -->
+<div class="music-card" id="musicCard">
+    <div class="music-info">
+        <div class="music-icon">🎵</div>
+        <div class="music-text">
+            浪漫旋律
+            <small>专属我们的歌</small>
+        </div>
+        <button class="music-control" id="musicToggle">播放</button>
+    </div>
+</div>
+
+<audio id="bgMusic" loop preload="auto">
+    <source src="https://music.163.com/song/media/outer/url?id=478507889.mp3" type="audio/mpeg">
+</audio>
+
+<div class="romance-container">
+    <!-- 浪漫标题 -->
+    <div class="title-section">
+        <h1>💗 时光放映机 💗</h1>
+        <p>每一帧都是与你有关的温柔</p>
+    </div>
+
+    <!-- 3D旋转相册 -->
+    <div class="album-wrapper">
+        <ul class="photo-sphere" id="photoSphere">
+            <!-- 照片会通过JS动态生成，保持图片路径不变 -->
+        </ul>
+    </div>
+
+    <!-- 浪漫按钮 -->
+    <div class="action-area">
+        <a href="../5/index.html">
+            <button class="btn-romantic">💖 么一下继续 💖</button>
+        </a>
+    </div>
+    
+    <!-- 倒计时卡片 -->
+    <div class="countdown-card">
+        <span class="time-number" id="countdownTimer">300</span>
+        <span class="time-label">秒后自动跳转至下一页 🌸</span>
+    </div>
+
+    <div class="footer-note">
+        ✨ 点击屏幕任意位置，会有甜蜜惊喜 ✨
+    </div>
+</div>
+
+<!-- 悬浮提示 -->
+<div class="hover-tip">✨ 鼠标悬停相册可暂停旋转 ✨</div>
+
+<script>
+    // ========== 照片数据 (保持原路径不变) ==========
+    const photos = [
+        "photos/1.jpg", "photos/2.jpg", "photos/3.jpg", "photos/4.jpg", "photos/5.jpg",
+        "photos/6.jpg", "photos/7.jpg", "photos/8.jpg", "photos/9.jpg", "photos/10.jpg"
+    ];
+    
+    // ========== 动态生成相册 ==========
+    const photoSphere = document.getElementById('photoSphere');
+    
+    photos.forEach((src, index) => {
+        const li = document.createElement('li');
+        li.className = 'photo-card';
+        li.setAttribute('data-pos', index);
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = `浪漫瞬间${index + 1}`;
+        img.loading = 'lazy';
+        
+        // 图片加载失败时的优雅降级
+        img.onerror = function() {
+            this.src = 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20180%20270%22%3E%3Crect%20width%3D%22180%22%20height%3D%22270%22%20fill%3D%22%23ffc0cb%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%20font-size%3D%2216%22%20font-weight%3D%22bold%22%3E❤️%20美好回忆%20❤️%3C%2Ftext%3E%3C%2Fsvg%3E';
+        };
+        
+        li.appendChild(img);
+        photoSphere.appendChild(li);
+    });
+    
+    // ========== 相册交互：鼠标悬浮暂停/恢复 ==========
+    const sphere = document.querySelector('.photo-sphere');
+    sphere.addEventListener('mouseenter', () => {
+        sphere.classList.add('paused');
+    });
+    sphere.addEventListener('mouseleave', () => {
+        sphere.classList.remove('paused');
+    });
+    
+    // ========== 动态漂浮爱心生成 ==========
+    const heartsContainer = document.getElementById('heartCanvas');
+    
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        const size = Math.random() * 18 + 10;
+        heart.style.width = size + 'px';
+        heart.style.height = size + 'px';
+        heart.style.left = Math.random() * 100 + '%';
+        heart.style.animationDuration = Math.random() * 5 + 4 + 's';
+        heart.style.animationDelay = Math.random() * 4 + 's';
+        const opacity = Math.random() * 0.5 + 0.3;
+        heart.style.background = `rgba(255, 210, 225, ${opacity})`;
+        heartsContainer.appendChild(heart);
+        
+        heart.addEventListener('animationend', () => {
+            heart.remove();
+        });
+    }
+    
+    // 初始生成爱心
+    for (let i = 0; i < 25; i++) {
+        setTimeout(() => createHeart(), i * 150);
+    }
+    
+    // 定时生成爱心
+    setInterval(() => {
+        if (heartsContainer.children.length < 60) {
+            createHeart();
+        }
+    }, 1200);
+    
+    // ========== 点击漂浮文字特效 ==========
+    const sweetWords = [
+        "老😬婆", "乖乖", "❤️宝贝❤️", "么😗么", "❤️❤️❤️", 
+        "❤️❤️", "乖乖", "❤️", "嘿嘿😬", "别点了😪", "略略略😝", 
+        "摸你屁屁🤗", "好喜欢你✨", "甜度满分💯", "永远在一起💞", 
+        "啵啵💋", "想你啦~", "心动预警💗", "我的小可爱", "抱抱🫂",
+        "💕 我爱你 💕", "你是我的光", "每天都要甜甜的", "只对你心动"
+    ];
+    let wordIndex = 0;
+    
+    document.body.addEventListener('click', (e) => {
+        // 避免点击按钮时产生过多特效
+        if (e.target.closest('.btn-romantic') || e.target.closest('.music-control')) return;
+        
+        const word = sweetWords[wordIndex % sweetWords.length];
+        wordIndex++;
+        
+        const span = document.createElement('span');
+        span.className = 'floating-love';
+        span.textContent = word;
+        
+        const colors = ['#ff6699', '#ff88aa', '#ff66b5', '#ff77aa', '#ff5e8e', '#ff99bb', '#ff6b81', '#ff8da1'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        const fontSize = Math.random() * 18 + 18;
+        
+        span.style.left = e.clientX + 'px';
+        span.style.top = (e.clientY - 15) + 'px';
+        span.style.fontSize = fontSize + 'px';
+        span.style.color = randomColor;
+        span.style.textShadow = '0 0 8px #fff, 0 0 5px #ffb3d9';
+        span.style.fontFamily = "'Segoe UI', 'PingFang SC', cursive";
+        
+        document.body.appendChild(span);
+        
+        setTimeout(() => span.remove(), 1400);
+    });
+    
+    // ========== 音乐播放器控制 ==========
+    const audio = document.getElementById('bgMusic');
+    const musicToggle = document.getElementById('musicToggle');
+    let isPlaying = false;
+    
+    // 尝试自动播放（需要用户交互）
+    musicToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isPlaying) {
+            audio.pause();
+            musicToggle.textContent = '播放';
+            isPlaying = false;
+        } else {
+            audio.play().catch(err => {
+                console.log('自动播放被阻止，需要用户交互');
+            });
+            musicToggle.textContent = '暂停';
+            isPlaying = true;
+        }
+    });
+    
+    // 页面任意点击尝试播放（首次交互时自动播放）
+    let hasPlayed = false;
+    document.body.addEventListener('click', () => {
+        if (!hasPlayed && audio.paused) {
+            audio.play().catch(() => {});
+            musicToggle.textContent = '暂停';
+            isPlaying = true;
+            hasPlayed = true;
+        }
+    });
+    
+    // ========== 倒计时跳转 ==========
+    const countdownElement = document.getElementById('countdownTimer');
+    let seconds = 300;
+    let countdownInterval;
+    
+    function updateCountdown() {
+        if (seconds > 0) {
+            seconds--;
+            countdownElement.textContent = seconds;
+        } else {
+            clearInterval(countdownInterval);
+            window.location.href = "../5/index.html";
+        }
+    }
+    
+    countdownInterval = setInterval(updateCountdown, 1000);
+    
+    // ========== 为照片卡片添加初始动画延迟 ==========
+    const cards = document.querySelectorAll('.photo-card');
+    cards.forEach((card, idx) => {
+        card.style.animationDelay = (idx * 0.05) + 's';
+    });
+    
+    // ========== 控制台浪漫输出 ==========
+    console.log('%c✨ 时光放映机已启动 ✨', 'color: #ff6b81; font-size: 16px; font-weight: bold;');
+    console.log('%c💖 鼠标悬停相册可暂停旋转，点击任意位置出现甜蜜文字 💖', 'color: #ff99bb; font-size: 12px;');
+    
+    // ========== 响应窗口大小变化，重置相册视角 ==========
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            // 强制重绘，确保3D效果正常
+            sphere.style.animation = 'none';
+            sphere.offsetHeight;
+            sphere.style.animation = '';
+        }, 100);
+    });
+    
+    // ========== 为音乐卡片添加悬浮效果 ==========
+    const musicCard = document.getElementById('musicCard');
+    musicCard.addEventListener('click', (e) => {
+        if (e.target === musicToggle) return;
+        musicToggle.click();
+    });
+</script>
+
+<!-- 额外样式优化 -->
+<style>
+    .photo-sphere {
+        transition: animation-play-state 0.2s;
+    }
+    
+    .photo-card {
+        transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+        will-change: transform;
+    }
+    
+    /* 确保相册在移动端触摸时流畅 */
+    @media (hover: none) and (pointer: coarse) {
+        .photo-sphere:hover {
+            animation-play-state: running;
+        }
+    }
+    
+    /* 优雅的加载效果 */
+    .photo-card img {
+        transition: transform 0.4s ease;
+    }
+    
+    /* 按钮点击无跳转样式问题 */
+    a {
+        display: inline-block;
+    }
+    
+    /* 数字等宽 */
+    #countdownTimer {
+        font-feature-settings: "tnum";
+        font-variant-numeric: tabular-nums;
+    }
+    
+    /* 音乐控制按钮样式 */
+    .music-control {
+        transition: all 0.2s ease;
+    }
+    
+    .music-control:active {
+        transform: scale(0.95);
+    }
+</style>
+</body>
+</html>
