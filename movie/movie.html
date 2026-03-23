@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>浪漫时刻 · 我们的专属影片</title>
     <style>
-        /* ========== 与表白页完全统一的风格 ========== */
         * {
             margin: 0;
             padding: 0;
@@ -28,7 +27,7 @@
         }
 
         /* 动态漂浮爱心背景 */
-        .floating-hearts {
+        。floating-hearts {
             position: fixed;
             top: 0;
             left: 0;
@@ -39,7 +38,7 @@
             overflow: hidden;
         }
 
-        .heart {
+        。heart {
             position: absolute;
             bottom: -40px;
             background: rgba(255, 240, 245, 0.7);
@@ -48,22 +47,22 @@
             opacity: 0.6;
         }
 
-        .heart::before,
-        .heart::after {
+        。heart::before,
+        。heart::after {
             content: '';
             position: absolute;
             background: inherit;
             border-radius: 50%;
         }
 
-        .heart::before {
+        。heart::before {
             top: -50%;
             left: 0;
             width: 100%;
             height: 100%;
         }
 
-        .heart::after {
+        。heart::after {
             top: 0;
             left: -50%;
             width: 100%;
@@ -81,8 +80,8 @@
             }
         }
 
-        /* 主容器 - 完美铺满无滚动 */
-        .video-container {
+        /* 主容器 */
+        。video-container {
             position: relative;
             z-index: 10;
             width: 100%;
@@ -108,14 +107,14 @@
         }
 
         /* 浪漫标题卡片 - 紧凑版 */
-        .title-card {
+        。title-card {
             text-align: center;
             margin-bottom: 12px;
             animation: titleFloat 2s ease-in-out infinite;
             flex-shrink: 0;
         }
 
-        .title-card h1 {
+        。title-card h1 {
             font-size: clamp(1.3rem, 5vw, 2rem);
             font-weight: 700;
             background: linear-gradient(135deg, #fff, #ffeef4);
@@ -206,7 +205,7 @@
             box-shadow: 0 7px 0 #b23c50;
         }
 
-        .btn-romantic:active {
+        。btn-romantic:active {
             transform: translateY(3px);
             box-shadow: 0 2px 0 #b23c50;
         }
@@ -339,7 +338,7 @@
         }
 
         @keyframes spin {
-            to { transform: translate(-50%, -50%) rotate(360deg); }
+            到 { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         /* 响应式适配 - 确保各屏幕铺满 */
@@ -363,7 +362,7 @@
                 min-width: 70px;
                 padding: 0 10px;
             }
-            .countdown-text {
+            。countdown-text {
                 font-size: 0.75rem;
             }
             .countdown-card {
@@ -377,7 +376,7 @@
             .title-card {
                 margin-bottom: 6px;
             }
-            .footer-love {
+            。footer-love {
                 margin-top: 5px;
                 font-size: 0.55rem;
             }
@@ -388,7 +387,7 @@
                 padding: 6px 18px;
                 font-size: 0.75rem;
             }
-            .countdown-number {
+            。countdown-number {
                 font-size: 1.2rem;
                 min-width: 55px;
                 padding: 0 6px;
@@ -483,7 +482,7 @@
     
     // 显示加载状态
     video.addEventListener('waiting', () => {
-        loadingDiv.style.opacity = '1';
+        loadingDiv。style.opacity = '1';
     });
     
     video.addEventListener('canplay', () => {
@@ -577,7 +576,7 @@
     
     // ========== 点击漂浮文字特效 ==========
     const sweetWords = [
-        "秀秀", "老😬婆", "乖乖", "❤️宝贝❤️", "么😗么", "❤️❤️❤️", 
+        "老😬婆"， "乖乖"， "❤️宝贝❤️"， "么😗么"， "❤️❤️❤️"， 
         "❤️❤️", "乖乖", "❤️", "嘿嘿😬", "别点了😪", "略略略😝", 
         "摸你屁屁🤗", "好喜欢你✨", "甜度满分💯", "永远在一起💞", 
         "啵啵💋", "想你啦~", "心动预警💗", "我的小可爱", "抱抱🫂",
