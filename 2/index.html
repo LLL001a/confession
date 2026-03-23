@@ -519,7 +519,7 @@
     audio.volume = 0;
     
     // 渐强函数
-    function fadeInAudio(duration = 2800) {
+    function fadeInAudio(duration = 5800) {
         if (fadeAnimationId) {
             cancelAnimationFrame(fadeAnimationId);
         }
@@ -546,7 +546,7 @@
     }
     
     // 渐弱函数
-    function fadeOutAudio(duration = 800, callback) {
+    function fadeOutAudio(duration = 3000, callback) {
         if (fadeAnimationId) {
             cancelAnimationFrame(fadeAnimationId);
         }
