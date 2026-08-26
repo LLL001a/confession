@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>浪漫时刻 · 我们的专属影片</title>
+    <style>
+        :root {
+            --rose-50: #fff1f2;
+            --rose-100: #ffe4e6;
+            --rose-200: #fecdd3;
+            --rose-300: #fda4af;
+            --rose-400: #fb7185;
+            --rose-500: #f43f5e;
+            --rose-600: #e11d48;
+            --violet-500: #8b5cf6;
+            --violet-600: #7c3aed;
+            --ink: #432f36;
+            --ink-soft: #8a6f78;
+            --glass: rgba(255, 255, 255, 0.72);
+            --shadow-soft: 0 24px 60px -18px rgba(225, 29, 72, 0.22), 0 10px 30px -12px rgba(0, 0, 0, 0.10);
+            --ease: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Quicksand', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(1100px 800px at 85% -10%, rgba(244, 63, 94, 0.15), transparent 60%),
+                radial-gradient(900px 700px at -8% 110%, rgba(139, 92, 246, 0.10), transparent 55%),
+                linear-gradient(160deg, #fff7f8 0%, #ffeef1 45%, #ffe3ea 100%);
+        }
+
+        /* 漂浮爱心 */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .heart {
+            position: absolute;
+            bottom: -40px;
+            width: 20px;
+            height: 20px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffc6d4' d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center / contain no-repeat;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 0.8; }
+            100% { transform: translateY(-120vh); opacity: 0; }
+        }
+
+        /* 开场揭晓 */
+        .intro-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            background: linear-gradient(160deg, #fff7f8, #ffe3ea);
+            transition: opacity 0.7s var(--ease), visibility 0.7s;
+        }
+        .intro-overlay.done { opacity: 0; visibility: hidden; pointer-events: none; }
+        .intro-heart {
+            font-size: 56px;
+            animation: heartBeat 1.1s ease-in-out infinite;
+            filter: drop-shadow(0 10px 24px rgba(225, 29, 72, 0.35));
+        }
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            14% { transform: scale(1.18); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.14); }
+            70% { transform: scale(1); }
+        }
+        .intro-text {
+            font-size: 15px;
+            letter-spacing: 3px;
+            color: var(--ink-soft);
+            font-weight: 600;
+            animation: textGlow 1.6s ease-in-out infinite alternate;
+        }
+        @keyframes textGlow { from { opacity: 0.55; } to { opacity: 1; } }
+        .intro-line {
+            width: 90px;
+            height: 3px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--rose-300), var(--rose-500));
+            animation: lineGrow 0.9s var(--ease) infinite alternate;
+        }
+        @keyframes lineGrow { from { transform: scaleX(0.4); opacity: 0.5; } to { transform: scaleX(1); opacity: 1; } }
+
+        .video-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(12px, 3vh, 24px) 18px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .video-container::-webkit-scrollbar { display: none; }
+
+        .title-card {
+            text-align: center;
+            margin-bottom: clamp(10px, 2vh, 18px);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .title-card h1 {
+            font-size: clamp(1.4rem, 5.5vw, 2.1rem);
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(120deg, #f43f5e, #e11d48 50%, #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 6px 26px rgba(225, 29, 72, 0.14);
+            transition: transform 0.25s var(--ease);
+        }
+        .title-card h1:active { transform: scale(0.95); }
+        .title-card p {
+            font-size: clamp(0.72rem, 2.6vw, 0.9rem);
+            color: var(--ink-soft);
+            margin-top: 6px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .video-wrapper {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 28px;
+            padding: 10px;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.35s var(--ease);
+            flex-shrink: 1;
+            width: 100%;
+            max-width: 880px;
+            margin: clamp(6px, 1.5vh, 12px) 0;
+        }
+        .video-wrapper:hover { transform: scale(1.01); }
+
+        video {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 56vh;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+            cursor: pointer;
+            transition: transform 0.3s;
+            object-fit: contain;
+            background: linear-gradient(145deg, #2a1a2a, #1a0a1a);
+        }
+        video:active { transform: scale(0.99); }
+
+        .video-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: var(--rose-500);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        .button-group {
+            display: flex;
+            gap: clamp(12px, 3vw, 22px);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: clamp(10px, 2vh, 16px) 0 clamp(6px, 1vh, 10px);
+            flex-shrink: 0;
+        }
+
+        .btn-romantic {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--rose-500), var(--rose-600));
+            border: none;
+            padding: clamp(9px, 2vh, 12px) clamp(26px, 5vw, 36px);
+            border-radius: 50px;
+            font-size: clamp(0.85rem, 3vw, 1rem);
+            font-weight: 800;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.25s var(--ease);
+            box-shadow: 0 12px 28px -10px rgba(225, 29, 72, 0.65);
+            font-family: inherit;
+            letter-spacing: 1px;
+        }
+        .btn-romantic:hover { transform: translateY(-3px) scale(1.02); }
+        .btn-romantic:active { transform: translateY(1px) scale(0.96); }
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--violet-500), var(--violet-600));
+            box-shadow: 0 12px 28px -10px rgba(124, 58, 237, 0.6);
+        }
+        .btn-secondary:hover { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+
+        .countdown-card {
+            background: var(--glass);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+            padding: clamp(6px, 1.5vh, 10px) clamp(18px, 4vw, 26px);
+            margin: clamp(6px, 1.2vh, 10px) auto;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 10px;
+            box-shadow: 0 10px 26px -12px rgba(225, 29, 72, 0.28);
+            flex-shrink: 0;
+        }
+        .countdown-number {
+            font-size: clamp(1.5rem, 5vw, 2.1rem);
+            font-weight: 800;
+            color: var(--rose-600);
+            background: #fff;
+            padding: 0 clamp(10px, 2vw, 16px);
+            border-radius: 50px;
+            min-width: clamp(64px, 12vw, 88px);
+            display: inline-block;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+            font-variant-numeric: tabular-nums;
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.06), 0 3px 10px rgba(225, 29, 72, 0.10);
+        }
+        .countdown-text {
+            font-size: clamp(0.72rem, 2.5vw, 0.9rem);
+            font-weight: 700;
+            color: var(--rose-500);
+            letter-spacing: 1px;
+        }
+
+        .footer-love {
+            text-align: center;
+            margin-top: clamp(6px, 1vh, 10px);
+            font-size: 0.7rem;
+            color: var(--ink-soft);
+            letter-spacing: 1px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .hover-tip {
+            position: fixed;
+            bottom: 12px;
+            right: 12px;
+            background: var(--glass);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: var(--rose-600);
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 600;
+            z-index: 1000;
+            pointer-events: none;
+            font-family: inherit;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        /* 点击漂浮文字 */
+        .floating-love {
+            position: fixed;
+            pointer-events: none;
+            z-index: 99999;
+            font-weight: bold;
+            white-space: nowrap;
+            animation: floatAway 1.5s ease-out forwards;
+        }
+        @keyframes floatAway {
+            0% { opacity: 1; transform: translateY(0) scale(0.4) rotate(0deg); }
+            30% { opacity: 0.95; transform: translateY(-30px) scale(1.15) rotate(6deg); }
+            70% { opacity: 0.6; transform: translateY(-85px) scale(0.95) rotate(-3deg); }
+            100% { opacity: 0; transform: translateY(-140px) scale(0.7) rotate(5deg); }
+        }
+
+        /* 彩蛋：光影汇聚（粒子从四周飞向中心，汇聚成心形后爆散） */
+        .converge-p {
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            transition: transform 1.1s cubic-bezier(0.2, 0.9, 0.3, 1.15), opacity 0.85s ease-out;
+            will-change: transform, opacity;
+            filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.55));
+        }
+
+        ::-webkit-scrollbar { display: none; }
+        a { text-decoration: none; display: inline-block; }
+
+        @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            video { max-height: 48vh; }
+            .video-wrapper { padding: 6px; border-radius: 22px; }
+            .button-group { gap: 12px; }
+            .footer-love { font-size: 0.6rem; }
+        }
+        @media (max-width: 480px) {
+            video { max-height: 42vh; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="intro-overlay" id="introOverlay">
+    <div class="intro-heart">💗</div>
+    <div class="intro-text">专属放映厅</div>
+    <div class="intro-line"></div>
+</div>
+
+<div class="floating-hearts" id="heartCanvas"></div>
+
+<div class="video-container">
+    <div class="title-card" id="titleCard">
+        <h1>💋 专属放映厅 💋</h1>
+        <p>每一帧都是心动的痕迹 · 连点标题有惊喜</p>
+    </div>
+
+    <div class="video-wrapper">
+        <video id="loveVideo" controls="controls" playsinline>
+            您的浏览器不支持视频播放，换个浏览器试试吧~
+        </video>
+        <div class="video-loading" id="videoLoading"></div>
+    </div>
+
+    <div class="button-group">
+        <button class="btn-romantic" id="playPauseBtn">⏸️ 播放/暂停</button>
+        <a href="../gallery/index.html">
+            <button class="btn-romantic btn-secondary">💖 么么下一页 💖</button>
+        </a>
+    </div>
+
+    <div class="countdown-card">
+        <span class="countdown-number" id="timer">210</span>
+        <span class="countdown-text">秒后自动跳转至下一页 🌸</span>
+    </div>
+
+    <div class="footer-love">
+        ✨ 点击屏幕任意位置，会有甜蜜惊喜 ✨
+    </div>
+</div>
+
+<div class="hover-tip">🎬 点击视频也可播放/暂停</div>
+
+<script src="../../assets/js/config.js"></script>
+<script src="../../assets/js/site.js"></script>
+<script>
+    // ========== 开场揭晓 ==========
+    (function () {
+        const overlay = document.getElementById('introOverlay');
+        setTimeout(() => overlay.classList.add('done'), 1500);
+    })();
+
+    // ========== 彩蛋：光影汇聚（粒子从四周飞向中心，汇聚成心形后爆散） ==========
+    const CONVERGE_EMOJI = ['🎬', '💖', '✨', '🎞️', '🌸', '💋', '⭐', '🍿'];
+    function lightConverge(cx, cy, count = 48) {
+        const points = [];
+        for (let i = 0; i < count; i++) {
+            const t = (i / count) * Math.PI * 2;
+            const hx = 16 * Math.pow(Math.sin(t), 3);
+            const hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+            points.push({ x: cx + hx * 5.5, y: cy + hy * 5.5 });
+        }
+        const els = points.map((p, i) => {
+            const el = document.createElement('div');
+            el.className = 'converge-p';
+            el.textContent = CONVERGE_EMOJI[i % CONVERGE_EMOJI.length];
+            el.style.fontSize = (13 + Math.random() * 11) + 'px';
+            el.style.left = Math.random() * window.innerWidth + 'px';
+            el.style.top = Math.random() * window.innerHeight + 'px';
+            document.body.appendChild(el);
+            return { el, tx: p.x, ty: p.y };
+        });
+        // 相位 1：从四周飞向心形轮廓
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                els.forEach(({ el, tx, ty }) => {
+                    el.style.transform = `translate(${tx}px, ${ty}px) scale(1)`;
+                    el.style.opacity = '1';
+                });
+            });
+        });
+        // 相位 2：心形炸开，粒子向外飞散
+        setTimeout(() => {
+            els.forEach(({ el, tx, ty }) => {
+                const a = Math.random() * Math.PI * 2;
+                const d = 150 + Math.random() * 180;
+                el.style.transition = 'transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease-in';
+                el.style.transform = `translate(${tx + Math.cos(a) * d}px, ${ty + Math.sin(a) * d - 60}px) scale(0.1) rotate(${Math.random() * 360}deg)`;
+                el.style.opacity = '0';
+            });
+        }, 1250);
+        setTimeout(() => els.forEach(({ el }) => el.remove()), 2300);
+    }
+    (function () {
+        const title = document.getElementById('titleCard');
+        let clicks = 0, lastTime = 0;
+        title.addEventListener('click', () => {
+            const now = Date.now();
+            if (now - lastTime > 900) clicks = 0;
+            lastTime = now;
+            clicks++;
+            if (clicks === 3) {
+                clicks = 0;
+                const r = title.getBoundingClientRect();
+                lightConverge(r.left + r.width / 2, r.top + r.height / 2, 48);
+            }
+        });
+    })();
+
+    // ========== 视频控制（保留原逻辑） ==========
+    const video = document.getElementById('loveVideo');
+    video.src = '../../assets/media/video/' + CONF.video;
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const loadingDiv = document.getElementById('videoLoading');
+
+    video.autoplay = true;
+    video.loop = true;
+    video.muted = false;
+
+    video.addEventListener('waiting', () => { loadingDiv.style.opacity = '1'; });
+    video.addEventListener('canplay', () => { loadingDiv.style.opacity = '0'; });
+    video.addEventListener('playing', () => {
+        loadingDiv.style.opacity = '0';
+        playPauseBtn.innerHTML = '⏸️ 播放/暂停';
+    });
+    video.addEventListener('pause', () => { playPauseBtn.innerHTML = '▶️ 播放/暂停'; });
+    video.addEventListener('play', () => { playPauseBtn.innerHTML = '⏸️ 播放/暂停'; });
+
+    function togglePlay() {
+        if (video.paused) {
+            video.play().catch(err => console.log('播放失败:', err));
+        } else {
+            video.pause();
+        }
+    }
+    playPauseBtn.addEventListener('click', togglePlay);
+    video.addEventListener('click', togglePlay);
+
+    video.play().catch(err => {
+        console.log('自动播放被阻止，等待用户交互');
+        playPauseBtn.innerHTML = '▶️ 播放/暂停';
+    });
+
+    // ========== 倒计时（保留原 210 秒） ==========
+    const timerSpan = document.getElementById('timer');
+    let remainingSeconds = 210;
+    let countdownInterval;
+
+    function updateCountdown() {
+        if (remainingSeconds > 0) {
+            remainingSeconds--;
+            timerSpan.textContent = remainingSeconds;
+        } else {
+            clearInterval(countdownInterval);
+            window.location.href = "../gallery/index.html";
+        }
+    }
+    countdownInterval = setInterval(updateCountdown, 1000);
+
+    // ========== 漂浮爱心（保留） ==========
+    const heartsContainer = document.getElementById('heartCanvas');
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        const size = Math.random() * 18 + 10;
+        heart.style.width = size + 'px';
+        heart.style.height = size + 'px';
+        heart.style.left = Math.random() * 100 + '%';
+        heart.style.animationDuration = Math.random() * 5 + 4 + 's';
+        heart.style.animationDelay = Math.random() * 4 + 's';
+        heartsContainer.appendChild(heart);
+        heart.addEventListener('animationend', () => heart.remove());
+    }
+    for (let i = 0; i < 22; i++) setTimeout(() => createHeart(), i * 150);
+    setInterval(() => {
+        if (heartsContainer.children.length < 55) createHeart();
+    }, 1200);
+
+    // ========== 点击漂浮文字（保留原词库） ==========
+    const sweetWords = [
+        "老😬婆", "乖乖", "❤️宝贝❤️", "么😗么", "❤️❤️❤️",
+        "❤️❤️", "乖乖", "❤️", "嘿嘿😬", "别点了😪", "略略略😝",
+        "摸你屁屁🤗", "好喜欢你✨", "甜度满分💯", "永远在一起💞",
+        "啵啵💋", "想你啦~", "心动预警💗", "我的小可爱", "抱抱🫂",
+        "💕 我爱你 💕", "你是我的光", "每天都要甜甜的", "只对你心动",
+        "💋 亲亲", "好甜呀~", "永远在一起"
+    ];
+    let wordIndex = 0;
+
+    document.body.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-romantic') || e.target.closest('a') || e.target === video || e.target.closest('.video-wrapper') || e.target.closest('#titleCard')) {
+            return;
+        }
+        const word = sweetWords[wordIndex % sweetWords.length];
+        wordIndex++;
+        const span = document.createElement('span');
+        span.className = 'floating-love';
+        span.textContent = word;
+        const colors = ['#f43f5e', '#e11d48', '#fb7185', '#fda4af', '#be123c', '#7c3aed'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        const fontSize = Math.random() * 18 + 18;
+        span.style.left = e.clientX + 'px';
+        span.style.top = (e.clientY - 15) + 'px';
+        span.style.fontSize = fontSize + 'px';
+        span.style.color = randomColor;
+        span.style.textShadow = '0 0 8px #fff, 0 0 5px #fecdd3';
+        span.style.fontFamily = "'Segoe UI', 'PingFang SC', cursive";
+        document.body.appendChild(span);
+        setTimeout(() => span.remove(), 1400);
+    });
+
+    // ========== 视频加载失败提示（保留） ==========
+    video.addEventListener('error', () => {
+        const errorMsg = document.createElement('div');
+        errorMsg.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: #ff96ff;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 12px;
+            text-align: center;
+            white-space: nowrap;
+            z-index: 10;
+        `;
+        errorMsg.innerHTML = '💔 视频加载失败 💔<br>点击下方按钮继续';
+        video.parentElement.style.position = 'relative';
+        video.parentElement.appendChild(errorMsg);
+        setTimeout(() => { if (errorMsg.parentElement) errorMsg.remove(); }, 3000);
+    });
+
+    // ========== 页面可见性（保留） ==========
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && video.paused && !video.ended) {
+            video.play().catch(() => {});
+        }
+    });
+
+    // ========== 按钮波纹（保留） ==========
+    document.querySelectorAll('.btn-romantic').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            const ripple = document.createElement('span');
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.55);
+                width: 80px;
+                height: 80px;
+                margin-top: -40px;
+                margin-left: -40px;
+                transform: scale(0);
+                animation: ripple 0.5s ease-out;
+                pointer-events: none;
+            `;
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 500);
+        });
+    });
+
+    function adjustLayout() {
+        const container = document.querySelector('.video-container');
+        if (container && container.scrollHeight > window.innerHeight) {
+            const v = document.querySelector('video');
+            if (v) v.style.maxHeight = (window.innerHeight * 0.48) + 'px';
+        }
+    }
+    window.addEventListener('resize', adjustLayout);
+    setTimeout(adjustLayout, 100);
+
+    console.log('%c💖 专属放映厅已开启 💖', 'color:#e11d48; font-size:16px; font-weight:bold;');
+    console.log('%c💡 彩蛋提示：连点标题 3 次，有惊喜~', 'color:#fb7185; font-size:12px;');
+</script>
+</body>
+</html>

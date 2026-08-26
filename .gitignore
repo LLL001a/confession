@@ -1,0 +1,10 @@
+# 个人媒体素材（避免误提交真实照片/视频）
+assets/media/photos/*
+assets/media/video/*
+!assets/media/photos/.gitkeep
+!assets/media/video/.gitkeep
+
+# 服务器环境相关
+.htaccess
+.user.ini
+.well-known/
